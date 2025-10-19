@@ -1,12 +1,12 @@
 {
     "songInfo": {
-        "name": "Tetoris",
-        "artist": "Hiiragi Magnetite",
-        "audio": "music/tetoris.mp3",
-        "image": "img/covers/tetoris-cov.jpg",
-        "backgroundImage": "img/backgrounds/tetoris-bg.jpg",
-        "previewStart": 39.7,
-        "previewEnd": 62
+        "name": "Help me, ERINNNNNN!",
+        "artist": "beatMARIO",
+        "audio": "music/help-me-erin.mp3",
+        "image": "img/covers/help-me-erin-cov.webp",
+        "backgroundImage": "img/backgrounds/help-me-erin-bg.webp",
+        "previewStart": 13.8,
+        "previewEnd": 33.7
     },
     "chart": {
         "bpm": "120",

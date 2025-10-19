@@ -1,6 +1,6 @@
 let songList;
 let container = document.getElementById("container");
-let audio;
+let audio = new Audio();
 let currentAudio;
 
 GetSongList();
@@ -59,27 +59,21 @@ function CreateSongCard(imagePath, songName, artistName, audioPath, previewStart
 }
 
 function PlaySongPreview(audioPath, startTime, endTime){
-    if(audio != undefined){
-        if(currentAudio != audioPath){
-            audio.pause();
-            audio = new Audio(audioPath);
-            audio.currentTime = startTime;
-            audio.volume = 0.1;
-            audio.play();
-            currentAudio = audioPath;
-        }
-    }else{
+    if(currentAudio != audioPath){
+        audio.pause();
         audio = new Audio(audioPath);
-        audio.currentTime = startTime;
+        LoopPreview(startTime, endTime);
         audio.volume = 0.1;
-        audio.play();
         currentAudio = audioPath;
-    }  
-    LoopPreview(startTime, endTime);
+    }
 }
 
 function LoopPreview(startTime, endTime){
+    audio.currentTime = startTime;
+    audio.play();
     audio.ontimeupdate = function(){
+        //console.log(audio.currentTime);
+        console.log(endTime);
         if(audio.currentTime >= endTime){
             audio.currentTime = startTime;
         }
