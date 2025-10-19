@@ -2,8 +2,6 @@ let songList;
 let container = document.getElementById("container");
 let audio;
 let currentAudio;
-let currentStartTime;
-let currentEndTime;
 
 GetSongList();
 
@@ -69,17 +67,21 @@ function PlaySongPreview(audioPath, startTime, endTime){
             audio.volume = 0.1;
             audio.play();
             currentAudio = audioPath;
-            currentStartTime = startTime;
-            currentEndTime = endTime;
         }
     }else{
         audio = new Audio(audioPath);
-        currentAudio = audioPath;
         audio.currentTime = startTime;
         audio.volume = 0.1;
         audio.play();
         currentAudio = audioPath;
-        currentStartTime = startTime;
-        currentEndTime = endTime;
     }  
+    LoopPreview(startTime, endTime);
+}
+
+function LoopPreview(startTime, endTime){
+    audio.ontimeupdate = function(){
+        if(audio.currentTime >= endTime){
+            audio.currentTime = startTime;
+        }
+    }
 }

@@ -6,7 +6,7 @@
         "image": "img/covers/monitoring-cov.jpg",
         "backgroundImage": "img/backgrounds/monitoring-bg.webp",
         "previewStart": 55,
-        "previewEnd": 69
+        "previewEnd": 70
     },
     "chart": {
         "bpm": "120",
