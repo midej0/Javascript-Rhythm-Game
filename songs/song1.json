@@ -1,0 +1,22 @@
+{
+    "songInfo": {
+        "name": "Monitoring",
+        "artist": "Deco*27",
+        "audio": "music/monitoring.mp3",
+        "image": "img/covers/monitoring-cov.jpg",
+        "backgroundImage": "img/backgrounds/monitoring-bg.webp",
+        "previewStart": 55,
+        "previewEnd": 69
+    },
+    "chart": {
+        "bpm": "120",
+        "offset": "0",
+        "notes": [
+            {"time": 1, "type": "tap", "lane": 0},
+            {"time": 2, "type": "tap", "lane": 0},
+            {"time": 3, "type": "tap", "lane": 0},
+            {"time": 4, "type": "tap", "lane": 0},
+            {"time": 5, "type": "tap", "lane": 0}
+        ]
+    }
+}

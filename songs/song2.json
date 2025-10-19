@@ -1,0 +1,22 @@
+{
+    "songInfo": {
+        "name": "Tetoris",
+        "artist": "Hiiragi Magnetite",
+        "audio": "music/tetoris.mp3",
+        "image": "img/covers/tetoris-cov.jpg",
+        "backgroundImage": "img/backgrounds/tetoris-bg.jpg",
+        "previewStart": 39.5,
+        "previewEnd": 61
+    },
+    "chart": {
+        "bpm": "120",
+        "offset": "0",
+        "notes": [
+            {"time": 1, "type": "tap", "lane": 0},
+            {"time": 2, "type": "tap", "lane": 0},
+            {"time": 3, "type": "tap", "lane": 0},
+            {"time": 4, "type": "tap", "lane": 0},
+            {"time": 5, "type": "tap", "lane": 0}
+        ]
+    }
+}
