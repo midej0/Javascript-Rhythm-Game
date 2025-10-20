@@ -61,19 +61,19 @@ function CreateSongCard(imagePath, songName, artistName, audioPath, previewStart
 function PlaySongPreview(audioPath, startTime, endTime){
     if(currentAudio != audioPath){
         audio.pause();
+        LoopPreview(startTime, endTime);
         audio = new Audio(audioPath);
         LoopPreview(startTime, endTime);
         audio.volume = 0.1;
         currentAudio = audioPath;
+        audio.currentTime = startTime;
+        audio.play();
     }
 }
 
 function LoopPreview(startTime, endTime){
-    audio.currentTime = startTime;
-    audio.play();
     audio.ontimeupdate = function(){
-        //console.log(audio.currentTime);
-        console.log(endTime);
+        console.log(audio.currentTime);
         if(audio.currentTime >= endTime){
             audio.currentTime = startTime;
         }
