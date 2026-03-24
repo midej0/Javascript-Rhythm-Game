@@ -5,8 +5,8 @@
         "audio": "music/tetoris.mp3",
         "image": "img/covers/tetoris-cov.jpg",
         "backgroundImage": "img/backgrounds/tetoris-bg.jpg",
-        "previewStart": 39.7,
-        "previewEnd": 62
+        "previewStart": 39700,
+        "previewEnd": 62000
     },
     "chart": {
         "bpm": "120",

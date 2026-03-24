@@ -1,3 +1,5 @@
+import { Setup } from "/scripts/game.js";
+
 let songList;
 let container = document.getElementById("container");
 let audio = new Audio();
@@ -22,19 +24,23 @@ async function GetSongInfo(songPath) {
     try {
         let response = await fetch(songPath);
         let songInfo = await response.json();
-        songInfo = songInfo.songInfo;
-        CreateSongCard(songInfo.image, songInfo.name, songInfo.artist, songInfo.audio, songInfo.previewStart, songInfo.previewEnd,songInfo.backgroundImage);
+        songInfo = songInfo.songInfo
+        CreateSongCard(songInfo.image, songInfo.name, songInfo.artist, songInfo.audio, songInfo.previewStart, songInfo.previewEnd, songInfo.backgroundImage, songPath);
     } catch (error) {
         console.error(error);
     }
 }
 
-function CreateSongCard(imagePath, songName, artistName, audioPath, previewStart, previewEnd, backgroundImagePath) {
+function CreateSongCard(imagePath, songName, artistName, audioPath, previewStart, previewEnd, backgroundImagePath, songPath) {
     let songCard = document.createElement("div");
     songCard.classList.add("songCard");
-    songCard.style.backgroundImage += 'linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.8)), url(' + backgroundImagePath + ')';
-    songCard.addEventListener("mouseover", (e) =>{
+    songCard.style.backgroundImage = 'linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.8)), url(' + backgroundImagePath + ')';
+
+    songCard.addEventListener("mouseover", (e) => {
         PlaySongPreview(audioPath, previewStart, previewEnd);
+    });
+    songCard.addEventListener("click", (e) => {
+        Setup(songPath);
     });
 
     let image = document.createElement("img");
@@ -58,8 +64,8 @@ function CreateSongCard(imagePath, songName, artistName, audioPath, previewStart
     container.appendChild(songCard);
 }
 
-function PlaySongPreview(audioPath, startTime, endTime){
-    if(currentAudio != audioPath){
+function PlaySongPreview(audioPath, startTime, endTime) {
+    if (currentAudio != audioPath) {
         audio.pause();
         LoopPreview(startTime, endTime);
         audio = new Audio(audioPath);
@@ -71,11 +77,10 @@ function PlaySongPreview(audioPath, startTime, endTime){
     }
 }
 
-function LoopPreview(startTime, endTime){
-    audio.ontimeupdate = function(){
-        console.log(audio.currentTime);
-        if(audio.currentTime >= endTime){
-            audio.currentTime = startTime;
+function LoopPreview(startTime, endTime) {
+    audio.ontimeupdate = function () {
+        if (audio.currentTime >= endTime/1000) {
+            audio.currentTime = startTime/1000;
         }
     }
 }

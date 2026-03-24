@@ -5,8 +5,8 @@
         "audio": "music/monitoring.mp3",
         "image": "img/covers/monitoring-cov.jpg",
         "backgroundImage": "img/backgrounds/monitoring-bg.webp",
-        "previewStart": 55,
-        "previewEnd": 70
+        "previewStart": 55000,
+        "previewEnd": 70000
     },
     "chart": {
         "bpm": "120",
