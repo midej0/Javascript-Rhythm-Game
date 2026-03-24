@@ -35,7 +35,7 @@ async function Setup(songPath) {
     await GetSong(songPath);
     console.log(song.songInfo.backgroundImage);
     document.getElementById("main").style.backgroundImage = 'linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url(' + song.songInfo.backgroundImage + ')';
-    SetSpawnYPositions()
+    SetSpawnXPositions()
     spawnXPositions.forEach((e) => {
         DrawSquare(e, 50, 50);
     });
