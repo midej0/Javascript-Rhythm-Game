@@ -16,7 +16,7 @@ img {
 
 /*custom style*/
 body {
-    background-color: aqua;
+    background-color: #3b3b3b;
     display: flex;
     flex-direction: column;
     min-height: 100vh;
@@ -37,7 +37,9 @@ footer {
 
 main {
     flex: 1;
-    background-size: 10%, 100%;
+    background-position: center;
+    background-size: 100%;
+    background-repeat: no-repeat;
 }
 
 #container {

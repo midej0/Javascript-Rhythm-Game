@@ -1,5 +1,3 @@
-import { Setup } from "/scripts/game.js";
-
 let songList;
 let container = document.getElementById("container");
 let audio = new Audio();
@@ -40,7 +38,8 @@ function CreateSongCard(imagePath, songName, artistName, audioPath, previewStart
         PlaySongPreview(audioPath, previewStart, previewEnd);
     });
     songCard.addEventListener("click", (e) => {
-        Setup(songPath);
+        localStorage.setItem("selectedSong", songPath);
+        location = "game.html";
     });
 
     let image = document.createElement("img");

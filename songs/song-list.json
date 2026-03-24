@@ -1,5 +1,8 @@
 {
     "songList":[
+        "songs/song1.json",
+        "songs/song2.json",
+        "songs/song3.json",
         "songs/song4.json"
     ]
 }
