@@ -42,36 +42,6 @@ main {
     background-repeat: no-repeat;
 }
 
-#container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.names {
-    margin-left: 10px;
-    color: white;
-    pointer-events: none;
-}
-
-.songCard {
-    border-radius: 20px;
-    padding: 10px;
-    margin: 10px;
-    display: flex;
-    background-position: center;
-    background-size: 100%;
-    min-width: 600px;
-    transition: 300ms;
-}
-
-.songCard:hover {
-    scale: 1.1;
-}
-
-.songCard>img {
-    border-radius: 10px;
-    width: 110px;
-    object-fit: cover;
-    pointer-events: none;
+#gl-canvas{
+    border: solid 10px black;
 }
