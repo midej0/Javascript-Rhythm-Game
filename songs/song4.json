@@ -2,15 +2,16 @@
     "songInfo": {
         "name": "So High",
         "artist": "Ridiculon",
-        "audio": "music/monitoring.mp3",
+        "audio": "music/so-high.mp3",
         "image": "img/covers/so-high-cov.jpg",
         "backgroundImage": "img/backgrounds/so-high-bg.webp",
-        "previewStart": 55000,
-        "previewEnd": 70000
+        "previewStart": 84000,
+        "previewEnd": 98200
     },
     "chart": {
         "bpm": "120",
         "offset": "0",
+        "lanes": "4",
         "notes": [
             {"time": 1, "type": "tap", "lane": 0},
             {"time": 2, "type": "tap", "lane": 0},

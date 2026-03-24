@@ -11,6 +11,7 @@
     "chart": {
         "bpm": "120",
         "offset": "0",
+        "lanes": "4",
         "notes": [
             {"time": 1, "type": "tap", "lane": 0},
             {"time": 2, "type": "tap", "lane": 0},
