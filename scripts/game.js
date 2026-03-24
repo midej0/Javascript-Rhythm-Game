@@ -13,7 +13,7 @@ export async function Setup(songPath){
     await GetSong(songPath);
     console.log(song.songInfo.backgroundImage);
     HideMainMenu();
-    document.getElementById("main").style.backgroundImage = 'linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url(' + song.songInfo.backgroundImage + ')';
+    document.getElementById("main").style.backgroundImage = 'linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5  )), url(' + song.songInfo.backgroundImage + ')';
 }
 
 function HideMainMenu(){
