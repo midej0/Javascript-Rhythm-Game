@@ -22,17 +22,15 @@ let noteIndex = 0;
 let spawnXPositions = [];
 let notes = [];
 let noteColors = ["red", "green", "blue", "yellow"];
-let spawnYPosition = 0;
+let spawnYPosition = -50;
 let perfectYpos = 1200;
 let noteSize = 100;
-let fallSpeed = 1600;
+let fallSpeed = 1000;
 let backgroundDim = 0.4;
-let timeToPerfect = ((perfectYpos-spawnYPosition)/fallSpeed) * 1000
+let timeToPerfect = ((perfectYpos - spawnYPosition) / fallSpeed) * 1000
 
 //Debug
 let drawSpawnPoints = true;
-
-
 
 /** @type {HTMLCanvasElement} */
 const canvas = document.getElementById("gl-canvas");
@@ -47,14 +45,31 @@ if (ctx == null) {
 
 Setup(localStorage.getItem("selectedSong"));
 
+async function Setup(songPath) {
+    await GetSong(songPath);
+    chart = song.chart.notes;
+    chartLength = chart.length;
+    document.getElementById("main").style.backgroundImage = 'linear-gradient(rgba(0, 0, 0, ' + backgroundDim + '), rgba(0, 0, 0, ' + backgroundDim + ')), url(' + song.songInfo.backgroundImage + ')';
+    SetSpawnXPositions();
+    BindInput();
+    window.requestAnimationFrame(Tick);
+}
+
+async function GetSong(songPath) {
+    try {
+        let response = await fetch(songPath);
+        song = await response.json();
+    } catch (error) {
+        console.log(error);
+    }
+}
+
 function Tick() {
     UpdateTime();
-    if (noteIndex < chartLength) {
-        TickSpawning();
-    }
+    TickSpawning();
     TickNotes();
+    TickDeletion();
     DrawCanvas();
-    //Get Input
     window.requestAnimationFrame(Tick);
 }
 
@@ -65,20 +80,23 @@ function UpdateTime() {
 }
 
 function TickSpawning() {
-    if (chart[noteIndex].time - timeToPerfect <= timeElapsed) {
-        SpawnNote(chart[noteIndex].lane);
-        noteIndex++;
+    if (noteIndex < chartLength) {
+        if (chart[noteIndex].time - timeToPerfect <= timeElapsed) {
+            SpawnNote(chart[noteIndex].lane);
+            noteIndex++;
+            TickSpawning();
+        }
     }
 }
 
 function TickNotes() {
-    notes.forEach((e, i) => {
+    notes.forEach(e => {
         e.yPosition += fallSpeed * deltaTime;
-        if(e.yPosition >= perfectYpos){
-            console.log(timeElapsed);
-            DeleteNote(i);
-        }
+    });
+}
 
+function TickDeletion(){
+    notes.forEach((e, i) => {
         if (e.yPosition >= canvas.height + (noteSize / 2)) {
             DeleteNote(i);
         }
@@ -117,28 +135,45 @@ function DrawSquare(x, y, size) {
     ctx.fillRect(x - (size / 2), y - (size / 2), size, size);
 }
 
-async function Setup(songPath) {
-    await GetSong(songPath);
-    chart = song.chart.notes;
-    chartLength = chart.length;
-    document.getElementById("main").style.backgroundImage = 'linear-gradient(rgba(0, 0, 0, ' + backgroundDim + '), rgba(0, 0, 0, ' + backgroundDim + ')), url(' + song.songInfo.backgroundImage + ')';
-    SetSpawnXPositions();
-    window.requestAnimationFrame(Tick);
-}
-
-async function GetSong(songPath) {
-    try {
-        let response = await fetch(songPath);
-        song = await response.json();
-    } catch (error) {
-        console.log(error);
-    }
-}
-
 function SetSpawnXPositions() {
     let lanes = song.chart.lanes
     for (let i = 0; i < lanes; i++) {
         let index = i + 1;
         spawnXPositions.push((canvas.width / (lanes * 2)) * (index + (index - 1)));
     }
+}
+
+//TODO: Fix Closest So It Prioritises Infront After Distance Is Too Great
+function Input(lane) {
+    let closestNoteIndex = Number.POSITIVE_INFINITY;
+    let closestNoteDist = Number.POSITIVE_INFINITY;
+
+    notes.forEach((e, i) => {
+        if (e.lane == lane && 200 - e.yPosition < closestNoteDist) {
+            closestNoteDist = 200 - e.yPosition;
+            closestNoteIndex = i;
+        }
+    });
+    if (closestNoteIndex < chartLength) {
+        DeleteNote(closestNoteIndex);
+    }
+}
+
+function BindInput() {
+    document.addEventListener("keydown", (event) => {
+        const keyName = event.key;
+
+        if (keyName === "d") {
+            Input(0);
+        }
+        if (keyName === "f") {
+            Input(1);
+        }
+        if (keyName === "j") {
+            Input(2);
+        }
+        if (keyName === "k") {
+            Input(3);
+        }
+    });
 }
