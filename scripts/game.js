@@ -15,6 +15,7 @@ let lastTime;
 let song;
 let spawnXPositions = [];
 let notes = [];
+let noteColors = ["red", "green", "blue", "yellow"];
 let spawnYPosition = 0;
 let noteSize = 100;
 let fallSpeed = 1000;
@@ -36,18 +37,13 @@ if (ctx == null) {
     window.location = "index.html";
 }
 
-ctx.fillStyle = "blue";
 Setup(localStorage.getItem("selectedSong"));
-
-
-
-
-
 
 function Tick() {
     UpdateTime();
     TickNotes();
     DrawCanvas();
+    //Get Input
     window.requestAnimationFrame(Tick);
 }
 
@@ -77,6 +73,7 @@ function DrawCanvas(){
     }
 
     notes.forEach(e => {
+        ctx.fillStyle = noteColors[e.lane];
         DrawSquare(e.xPosition, e.yPosition, noteSize);
     });
 }
