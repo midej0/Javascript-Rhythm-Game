@@ -12,14 +12,22 @@ let programStart = Date.now();
 let timeElapsed;
 let lastTime;
 
+//Chart
 let song;
+let chart;
+let chartLength;
+let noteIndex = 0;
+
+//Notes
 let spawnXPositions = [];
 let notes = [];
 let noteColors = ["red", "green", "blue", "yellow"];
 let spawnYPosition = 0;
+let perfectYpos = 1200;
 let noteSize = 100;
-let fallSpeed = 1000;
+let fallSpeed = 1600;
 let backgroundDim = 0.4;
+let timeToPerfect = ((perfectYpos-spawnYPosition)/fallSpeed) * 1000
 
 //Debug
 let drawSpawnPoints = true;
@@ -41,6 +49,9 @@ Setup(localStorage.getItem("selectedSong"));
 
 function Tick() {
     UpdateTime();
+    if (noteIndex < chartLength) {
+        TickSpawning();
+    }
     TickNotes();
     DrawCanvas();
     //Get Input
@@ -53,20 +64,32 @@ function UpdateTime() {
     deltaTime = (timeElapsed - lastTime) / 1000;
 }
 
+function TickSpawning() {
+    if (chart[noteIndex].time - timeToPerfect <= timeElapsed) {
+        SpawnNote(chart[noteIndex].lane);
+        noteIndex++;
+    }
+}
+
 function TickNotes() {
     notes.forEach((e, i) => {
         e.yPosition += fallSpeed * deltaTime;
+        if(e.yPosition >= perfectYpos){
+            console.log(timeElapsed);
+            DeleteNote(i);
+        }
+
         if (e.yPosition >= canvas.height + (noteSize / 2)) {
             DeleteNote(i);
         }
     });
 }
 
-function DrawCanvas(){
+function DrawCanvas() {
     //Clears the canvas
     canvas.width = canvas.width;
 
-    if(drawSpawnPoints == true){
+    if (drawSpawnPoints == true) {
         spawnXPositions.forEach(e => {
             DrawSquare(e, spawnYPosition, 50)
         });
@@ -76,6 +99,9 @@ function DrawCanvas(){
         ctx.fillStyle = noteColors[e.lane];
         DrawSquare(e.xPosition, e.yPosition, noteSize);
     });
+
+    ctx.fillStyle = "rgba(255.0, 255.0, 255.0, 0.5";
+    ctx.fillRect(0, perfectYpos - (noteSize / 2), canvas.width, noteSize);
 }
 
 function SpawnNote(lane) {
@@ -93,12 +119,10 @@ function DrawSquare(x, y, size) {
 
 async function Setup(songPath) {
     await GetSong(songPath);
+    chart = song.chart.notes;
+    chartLength = chart.length;
     document.getElementById("main").style.backgroundImage = 'linear-gradient(rgba(0, 0, 0, ' + backgroundDim + '), rgba(0, 0, 0, ' + backgroundDim + ')), url(' + song.songInfo.backgroundImage + ')';
     SetSpawnXPositions();
-    SpawnNote(0);
-    SpawnNote(1);
-    SpawnNote(2);
-    SpawnNote(3);
     window.requestAnimationFrame(Tick);
 }
 

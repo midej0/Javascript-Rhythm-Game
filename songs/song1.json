@@ -13,11 +13,11 @@
         "offset": "0",
         "lanes": "4",
         "notes": [
-            {"time": 1, "lane": 0},
-            {"time": 2, "lane": 0},
-            {"time": 3, "lane": 0},
-            {"time": 4, "lane": 0},
-            {"time": 5, "lane": 0}
+            {"time": 1000, "lane": 0},
+            {"time": 2000, "lane": 0},
+            {"time": 3000, "lane": 0},
+            {"time": 4000, "lane": 0},
+            {"time": 5000, "lane": 0}
         ]
     }
 }
