@@ -23,14 +23,22 @@ let spawnXPositions = [];
 let notes = [];
 let noteColors = ["red", "green", "blue", "yellow"];
 let spawnYPosition = -50;
-let perfectYpos = 1200;
+let perfectYpos = 1400;
 let noteSize = 100;
 let fallSpeed = 1000;
 let backgroundDim = 0.4;
-let timeToPerfect = ((perfectYpos - spawnYPosition) / fallSpeed) * 1000
+let perfectRange = 30;
+let greatRange = 60;
+let okayRange = 150;
+//Smallest dist is the maximum amount of pixels a note can be behind the perfectYpos before it is ignored.
+let smallestDist = -noteSize;
+let timeToPerfect = ((perfectYpos - spawnYPosition) / fallSpeed) * 1000;
 
 //Debug
 let drawSpawnPoints = true;
+let drawOkayrange = false;
+let drawGreatrange = false;
+let drawPerfectRange = false;
 
 /** @type {HTMLCanvasElement} */
 const canvas = document.getElementById("gl-canvas");
@@ -95,7 +103,7 @@ function TickNotes() {
     });
 }
 
-function TickDeletion(){
+function TickDeletion() {
     notes.forEach((e, i) => {
         if (e.yPosition >= canvas.height + (noteSize / 2)) {
             DeleteNote(i);
@@ -109,7 +117,7 @@ function DrawCanvas() {
 
     if (drawSpawnPoints == true) {
         spawnXPositions.forEach(e => {
-            DrawSquare(e, spawnYPosition, 50)
+            DrawSquare(e, spawnYPosition, 110)
         });
     }
 
@@ -117,6 +125,22 @@ function DrawCanvas() {
         ctx.fillStyle = noteColors[e.lane];
         DrawSquare(e.xPosition, e.yPosition, noteSize);
     });
+
+    if (drawOkayrange) {
+        ctx.fillStyle = "rgba(0.0, 0.0, 255.0, 0.5";
+        ctx.fillRect(0, perfectYpos - okayRange, canvas.width, okayRange * 2);
+    }
+
+    if (drawGreatrange) {
+        ctx.fillStyle = "rgba(0.0, 255.0, 0.0, 0.5";
+        ctx.fillRect(0, perfectYpos - greatRange, canvas.width, greatRange * 2);
+    }
+
+
+    if (drawPerfectRange) {
+        ctx.fillStyle = "rgba(255.0, 0.0, 0.0, 0.5";
+        ctx.fillRect(0, perfectYpos - perfectRange, canvas.width, perfectRange * 2);
+    }
 
     ctx.fillStyle = "rgba(255.0, 255.0, 255.0, 0.5";
     ctx.fillRect(0, perfectYpos - (noteSize / 2), canvas.width, noteSize);
@@ -143,19 +167,33 @@ function SetSpawnXPositions() {
     }
 }
 
-//TODO: Fix Closest So It Prioritises Infront After Distance Is Too Great
 function Input(lane) {
     let closestNoteIndex = Number.POSITIVE_INFINITY;
     let closestNoteDist = Number.POSITIVE_INFINITY;
 
     notes.forEach((e, i) => {
-        if (e.lane == lane && 200 - e.yPosition < closestNoteDist) {
-            closestNoteDist = 200 - e.yPosition;
+        let distance = perfectYpos - e.yPosition;
+        if (e.lane == lane && distance < closestNoteDist && distance >= smallestDist && distance <= okayRange) {
+            closestNoteDist = distance;
             closestNoteIndex = i;
         }
     });
+
     if (closestNoteIndex < chartLength) {
+        CalculateScore(Math.abs(closestNoteDist));
         DeleteNote(closestNoteIndex);
+    }
+}
+
+function CalculateScore(distance) {
+    if (distance <= perfectRange) {
+        console.log("Perfect");
+    } else if (distance <= greatRange) {
+        console.log("Great");
+    } else if (distance <= okayRange) {
+        console.log("Okay");
+    } else{
+        console.log("Unexpected Input Distance Used: " + distance);
     }
 }
 
@@ -163,6 +201,7 @@ function BindInput() {
     document.addEventListener("keydown", (event) => {
         const keyName = event.key;
 
+        //This is so goofy
         if (keyName === "d") {
             Input(0);
         }
