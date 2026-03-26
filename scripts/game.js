@@ -21,24 +21,39 @@ let noteIndex = 0;
 //Notes
 let spawnXPositions = [];
 let notes = [];
-let noteColors = ["red", "green", "blue", "yellow"];
 let spawnYPosition = -50;
 let perfectYpos = 1400;
 let noteSize = 100;
 let fallSpeed = 1000;
-let backgroundDim = 0.4;
-let perfectRange = 30;
-let greatRange = 60;
-let okayRange = 150;
 //Smallest dist is the maximum amount of pixels a note can be behind the perfectYpos before it is ignored.
 let smallestDist = -noteSize;
 let timeToPerfect = ((perfectYpos - spawnYPosition) / fallSpeed) * 1000;
 
+//Cosmetics
+let noteColors = ["red", "green", "blue", "yellow"];
+let backgroundDim = 0.4;
+
+//Scoring
+let perfectRange = 40;
+let greatRange = 90;
+let okayRange = 150;
+let badRange = 300;
+
 //Debug
-let drawSpawnPoints = true;
-let drawOkayrange = false;
-let drawGreatrange = false;
-let drawPerfectRange = false;
+let drawSpawnPoints = false;
+let renderScoringRanges = false;
+let drawBadRange = true;
+let drawOkayrange = true;
+let drawGreatrange = true;
+let drawPerfectRange = true;
+
+//Makees it possible to debug during runtime
+globalThis.drawSpawnPoints;
+globalThis.renderScoringRanges;
+globalThis.drawBadRange;
+globalThis.drawOkayrange;
+globalThis.drawGreatrange;
+globalThis.drawPerfectRange;
 
 /** @type {HTMLCanvasElement} */
 const canvas = document.getElementById("gl-canvas");
@@ -117,6 +132,7 @@ function DrawCanvas() {
 
     if (drawSpawnPoints == true) {
         spawnXPositions.forEach(e => {
+            ctx.fillStyle = "turquoise"
             DrawSquare(e, spawnYPosition, 110)
         });
     }
@@ -126,18 +142,23 @@ function DrawCanvas() {
         DrawSquare(e.xPosition, e.yPosition, noteSize);
     });
 
-    if (drawOkayrange) {
+    if(drawBadRange && renderScoringRanges){
+        ctx.fillStyle = "rgba(0.0, 0.0, 0.0, 0.5";
+        ctx.fillRect(0, perfectYpos - badRange, canvas.width, badRange * 2);
+    }
+
+    if (drawOkayrange && renderScoringRanges) {
         ctx.fillStyle = "rgba(0.0, 0.0, 255.0, 0.5";
         ctx.fillRect(0, perfectYpos - okayRange, canvas.width, okayRange * 2);
     }
 
-    if (drawGreatrange) {
+    if (drawGreatrange && renderScoringRanges) {
         ctx.fillStyle = "rgba(0.0, 255.0, 0.0, 0.5";
         ctx.fillRect(0, perfectYpos - greatRange, canvas.width, greatRange * 2);
     }
 
 
-    if (drawPerfectRange) {
+    if (drawPerfectRange && renderScoringRanges) {
         ctx.fillStyle = "rgba(255.0, 0.0, 0.0, 0.5";
         ctx.fillRect(0, perfectYpos - perfectRange, canvas.width, perfectRange * 2);
     }
@@ -173,7 +194,7 @@ function Input(lane) {
 
     notes.forEach((e, i) => {
         let distance = perfectYpos - e.yPosition;
-        if (e.lane == lane && distance < closestNoteDist && distance >= smallestDist && distance <= okayRange) {
+        if (e.lane == lane && distance < closestNoteDist && distance >= smallestDist && distance <= badRange) {
             closestNoteDist = distance;
             closestNoteIndex = i;
         }
@@ -192,6 +213,8 @@ function CalculateScore(distance) {
         console.log("Great");
     } else if (distance <= okayRange) {
         console.log("Okay");
+    } else if(distance <= badRange){
+        console.log("Bad");
     } else{
         console.log("Unexpected Input Distance Used: " + distance);
     }
