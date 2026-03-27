@@ -64,6 +64,7 @@ let scoreTable = [
 //Input
 //Used for click note detection, one for each lane
 let interactable = [true, true, true, true];
+let keysHeld = [false, false, false, false];
 //Keys and lanes pairs
 const keys = {
     d: 0,
@@ -261,15 +262,19 @@ function BindInput() {
         //This is so goofy
         if (keyName === "d" && interactable[keys["d"]]) {
             Input(keys["d"]);
+            keysHeld[keys["d"]] = true;
         }
         if (keyName === "f" && interactable[keys["f"]]) {
             Input(keys["f"]);
+            keysHeld[keys["f"]] = true;
         }
         if (keyName === "j" && interactable[keys["j"]]) {
             Input(keys["j"]);
+            keysHeld[keys["j"]] = true;
         }
         if (keyName === "k" && interactable[keys["k"]]) {
             Input(keys["k"]);
+            keysHeld[keys["k"]] = true;
         }
     });
 
@@ -279,15 +284,19 @@ function BindInput() {
         //This is so goofy
         if (keyName === "d") {
             interactable[keys["d"]] = true;
+            keysHeld[keys["d"]] = false;
         }
         if (keyName === "f") {
             interactable[keys["f"]] = true;
+            keysHeld[keys["f"]] = false;
         }
         if (keyName === "j") {
             interactable[keys["j"]] = true;
+            keysHeld[keys["j"]] = false;
         }
         if (keyName === "k") {
             interactable[keys["k"]] = true;
+            keysHeld[keys["k"]] = false;
         }
     });
 }
