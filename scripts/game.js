@@ -1,5 +1,6 @@
 class Note {
-    constructor(lane) {
+    constructor(lane, time) {
+        this.time = time;
         this.lane = lane;
         this.xPosition = spawnXPositions[lane];
         this.yPosition = spawnYPosition;
@@ -23,8 +24,8 @@ let spawnXPositions = [];
 let notes = [];
 let spawnYPosition = -50;
 let perfectYpos = 1400;
-let noteSize = 100;
-let fallSpeed = 1000;
+let noteSize = 150;
+let fallSpeed = 1400;
 //Smallest dist is the maximum amount of pixels a note can be behind the perfectYpos before it is ignored.
 let smallestDist = -noteSize;
 let timeToPerfect = ((perfectYpos - spawnYPosition) / fallSpeed) * 1000;
@@ -33,15 +34,21 @@ let timeToPerfect = ((perfectYpos - spawnYPosition) / fallSpeed) * 1000;
 let noteColors = ["red", "green", "blue", "yellow"];
 let backgroundDim = 0.4;
 
-//Scoring
-let perfectRange = 40;
-let greatRange = 90;
+//Scoring in milliseconds deviated from the time the note is supposed to be clicked
+let perfectRange = 50;
+let greatRange = 100;
 let okayRange = 150;
-let badRange = 300;
+let badRange = 250;
+let scoreTable = [
+    { limit: perfectRange, label: "Perfect"},
+    { limit: greatRange, label: "Great"},
+    { limit: okayRange, label: "Okay"},
+    { limit: badRange, label: "Bad"}
+]
 
 //Debug
 let drawSpawnPoints = false;
-let renderScoringRanges = false;
+let drawScoringRanges = true;
 let drawBadRange = true;
 let drawOkayrange = true;
 let drawGreatrange = true;
@@ -49,7 +56,7 @@ let drawPerfectRange = true;
 
 //Makees it possible to debug during runtime
 globalThis.drawSpawnPoints;
-globalThis.renderScoringRanges;
+globalThis.drawScoringRanges;
 globalThis.drawBadRange;
 globalThis.drawOkayrange;
 globalThis.drawGreatrange;
@@ -105,7 +112,7 @@ function UpdateTime() {
 function TickSpawning() {
     if (noteIndex < chartLength) {
         if (chart[noteIndex].time - timeToPerfect <= timeElapsed) {
-            SpawnNote(chart[noteIndex].lane);
+            SpawnNote(chart[noteIndex].lane, chart[noteIndex].time);
             noteIndex++;
             TickSpawning();
         }
@@ -142,33 +149,33 @@ function DrawCanvas() {
         DrawSquare(e.xPosition, e.yPosition, noteSize);
     });
 
-    if(drawBadRange && renderScoringRanges){
+    if (drawBadRange && drawScoringRanges) {
         ctx.fillStyle = "rgba(0.0, 0.0, 0.0, 0.5";
-        ctx.fillRect(0, perfectYpos - badRange, canvas.width, badRange * 2);
+        ctx.fillRect(0, perfectYpos - (badRange / 1000) * fallSpeed, canvas.width, (badRange / 1000) * fallSpeed * 2);
     }
 
-    if (drawOkayrange && renderScoringRanges) {
+    if (drawOkayrange && drawScoringRanges) {
         ctx.fillStyle = "rgba(0.0, 0.0, 255.0, 0.5";
-        ctx.fillRect(0, perfectYpos - okayRange, canvas.width, okayRange * 2);
+        ctx.fillRect(0, perfectYpos - (okayRange / 1000) * fallSpeed, canvas.width, (okayRange / 1000) * fallSpeed * 2);
     }
 
-    if (drawGreatrange && renderScoringRanges) {
+    if (drawGreatrange && drawScoringRanges) {
         ctx.fillStyle = "rgba(0.0, 255.0, 0.0, 0.5";
-        ctx.fillRect(0, perfectYpos - greatRange, canvas.width, greatRange * 2);
+        ctx.fillRect(0, perfectYpos - (greatRange / 1000) * fallSpeed, canvas.width, (greatRange / 1000) * fallSpeed * 2);
     }
 
 
-    if (drawPerfectRange && renderScoringRanges) {
+    if (drawPerfectRange && drawScoringRanges) {
         ctx.fillStyle = "rgba(255.0, 0.0, 0.0, 0.5";
-        ctx.fillRect(0, perfectYpos - perfectRange, canvas.width, perfectRange * 2);
+        ctx.fillRect(0, perfectYpos - (perfectRange / 1000) * fallSpeed, canvas.width, (perfectRange / 1000) * fallSpeed * 2);
     }
 
     ctx.fillStyle = "rgba(255.0, 255.0, 255.0, 0.5";
     ctx.fillRect(0, perfectYpos - (noteSize / 2), canvas.width, noteSize);
 }
 
-function SpawnNote(lane) {
-    notes.push(new Note(lane));
+function SpawnNote(lane, time) {
+    notes.push(new Note(lane, time));
 }
 
 function DeleteNote(index) {
@@ -190,34 +197,24 @@ function SetSpawnXPositions() {
 
 function Input(lane) {
     let closestNoteIndex = Number.POSITIVE_INFINITY;
-    let closestNoteDist = Number.POSITIVE_INFINITY;
+    let leastTimeDifference = Number.POSITIVE_INFINITY;
 
     notes.forEach((e, i) => {
+        let timeDifference = e.time - timeElapsed;
         let distance = perfectYpos - e.yPosition;
-        if (e.lane == lane && distance < closestNoteDist && distance >= smallestDist && distance <= badRange) {
-            closestNoteDist = distance;
+        if (e.lane == lane && timeDifference < leastTimeDifference && distance >= smallestDist && timeDifference <= badRange) {
+            leastTimeDifference = timeDifference;
             closestNoteIndex = i;
         }
     });
-
     if (closestNoteIndex < chartLength) {
-        CalculateScore(Math.abs(closestNoteDist));
+        console.log(GetScore(Math.abs(leastTimeDifference)));
         DeleteNote(closestNoteIndex);
     }
 }
 
-function CalculateScore(distance) {
-    if (distance <= perfectRange) {
-        console.log("Perfect");
-    } else if (distance <= greatRange) {
-        console.log("Great");
-    } else if (distance <= okayRange) {
-        console.log("Okay");
-    } else if(distance <= badRange){
-        console.log("Bad");
-    } else{
-        console.log("Unexpected Input Distance Used: " + distance);
-    }
+function GetScore(timeDifference) {
+    return scoreTable.find((item) => timeDifference <= item.limit).label ?? "Unexpected time difference used: " + timeDifference;
 }
 
 function BindInput() {
