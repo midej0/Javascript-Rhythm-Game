@@ -7,6 +7,15 @@ class Note {
     }
 }
 
+class RGBA {
+    constructor(red, green, blue, alpha) {
+        this.red = red;
+        this.blue = blue;
+        this.green = green;
+        this.alpha = alpha;
+    }
+}
+
 //Time Handling
 let deltaTime;
 let programStart = Date.now();
@@ -31,10 +40,16 @@ let smallestDist = -noteSize;
 let timeToPerfect = ((perfectYpos - spawnYPosition) / fallSpeed) * 1000;
 
 //Cosmetics
-let noteColors = ["red", "green", "blue", "yellow"];
+let noteColors = [
+    new RGBA(255.0, 0.0, 0.0, 1.0),
+    new RGBA(0.0, 255.0, 0.0, 1.0),
+    new RGBA(0.0, 0.0, 255.0, 1.0),
+    new RGBA(255.0, 255.0, 0.0, 1.0)
+];
 let backgroundDim = 0.4;
 
-//Scoring in milliseconds deviated from the time the note is supposed to be clicked
+//Scoring 
+//In milliseconds deviated from the time the note is supposed to be clicked
 let perfectRange = 50;
 let greatRange = 100;
 let okayRange = 150;
@@ -45,6 +60,17 @@ let scoreTable = [
     { limit: okayRange, label: "Okay" },
     { limit: badRange, label: "Bad" }
 ]
+
+//Input
+//Used for click note detection, one for each lane
+let interactable = [true, true, true, true];
+//Keys and lanes pairs
+const keys = {
+    d: 0,
+    f: 1,
+    j: 2,
+    k: 3
+}
 
 //Debug
 let drawSpawnPoints = false;
@@ -138,7 +164,8 @@ function DrawCanvas() {
     canvas.width = canvas.width;
 
     notes.forEach(e => {
-        ctx.fillStyle = noteColors[e.lane];
+        let noteColor = noteColors[e.lane];
+        ctx.fillStyle = `rgba(${noteColor.red}, ${noteColor.green}, ${noteColor.blue}, ${noteColor.alpha})`;
         DrawCircle(e.xPosition, e.yPosition, noteSize / 2, true);
     });
 
@@ -220,6 +247,7 @@ function Input(lane) {
         console.log(GetScore(Math.abs(leastTimeDifference)));
         DeleteNote(closestNoteIndex);
     }
+    interactable[lane] = false;
 }
 
 function GetScore(timeDifference) {
@@ -231,17 +259,35 @@ function BindInput() {
         const keyName = event.key;
 
         //This is so goofy
+        if (keyName === "d" && interactable[keys["d"]]) {
+            Input(keys["d"]);
+        }
+        if (keyName === "f" && interactable[keys["f"]]) {
+            Input(keys["f"]);
+        }
+        if (keyName === "j" && interactable[keys["j"]]) {
+            Input(keys["j"]);
+        }
+        if (keyName === "k" && interactable[keys["k"]]) {
+            Input(keys["k"]);
+        }
+    });
+
+    document.addEventListener("keyup", (event) => {
+        const keyName = event.key;
+
+        //This is so goofy
         if (keyName === "d") {
-            Input(0);
+            interactable[keys["d"]] = true;
         }
         if (keyName === "f") {
-            Input(1);
+            interactable[keys["f"]] = true;
         }
         if (keyName === "j") {
-            Input(2);
+            interactable[keys["j"]] = true;
         }
         if (keyName === "k") {
-            Input(3);
+            interactable[keys["k"]] = true;
         }
     });
 }
