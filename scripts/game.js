@@ -24,7 +24,7 @@ let spawnXPositions = [];
 let notes = [];
 let spawnYPosition = -50;
 let perfectYpos = 1400;
-let noteSize = 150;
+let noteSize = 175;
 let fallSpeed = 1400;
 //Smallest dist is the maximum amount of pixels a note can be behind the perfectYpos before it is ignored.
 let smallestDist = -noteSize;
@@ -40,15 +40,15 @@ let greatRange = 100;
 let okayRange = 150;
 let badRange = 250;
 let scoreTable = [
-    { limit: perfectRange, label: "Perfect"},
-    { limit: greatRange, label: "Great"},
-    { limit: okayRange, label: "Okay"},
-    { limit: badRange, label: "Bad"}
+    { limit: perfectRange, label: "Perfect" },
+    { limit: greatRange, label: "Great" },
+    { limit: okayRange, label: "Okay" },
+    { limit: badRange, label: "Bad" }
 ]
 
 //Debug
 let drawSpawnPoints = false;
-let drawScoringRanges = true;
+let drawScoringRanges = false;
 let drawBadRange = true;
 let drawOkayrange = true;
 let drawGreatrange = true;
@@ -137,16 +137,19 @@ function DrawCanvas() {
     //Clears the canvas
     canvas.width = canvas.width;
 
-    if (drawSpawnPoints == true) {
-        spawnXPositions.forEach(e => {
-            ctx.fillStyle = "turquoise"
-            DrawSquare(e, spawnYPosition, 110)
-        });
-    }
-
     notes.forEach(e => {
         ctx.fillStyle = noteColors[e.lane];
-        DrawSquare(e.xPosition, e.yPosition, noteSize);
+        DrawCircle(e.xPosition, e.yPosition, noteSize / 2, true);
+    });
+
+    spawnXPositions.forEach(e => {
+        if (drawSpawnPoints == true) {
+            ctx.fillStyle = "turquoise"
+            DrawSquare(e, spawnYPosition, 110)
+        }
+        ctx.lineWidth = 10;
+        ctx.strokeStyle = "white";
+        DrawCircle(e, perfectYpos, noteSize / 2, false)
     });
 
     if (drawBadRange && drawScoringRanges) {
@@ -164,14 +167,10 @@ function DrawCanvas() {
         ctx.fillRect(0, perfectYpos - (greatRange / 1000) * fallSpeed, canvas.width, (greatRange / 1000) * fallSpeed * 2);
     }
 
-
     if (drawPerfectRange && drawScoringRanges) {
         ctx.fillStyle = "rgba(255.0, 0.0, 0.0, 0.5";
         ctx.fillRect(0, perfectYpos - (perfectRange / 1000) * fallSpeed, canvas.width, (perfectRange / 1000) * fallSpeed * 2);
     }
-
-    ctx.fillStyle = "rgba(255.0, 255.0, 255.0, 0.5";
-    ctx.fillRect(0, perfectYpos - (noteSize / 2), canvas.width, noteSize);
 }
 
 function SpawnNote(lane, time) {
@@ -180,6 +179,16 @@ function SpawnNote(lane, time) {
 
 function DeleteNote(index) {
     notes.splice(index, 1);
+}
+
+function DrawCircle(x, y, radius, filled) {
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, 2 * Math.PI);
+    if (filled) {
+        ctx.fill();
+    } else {
+        ctx.stroke();
+    }
 }
 
 //A custom draw square function that puts the position at the center of the square
