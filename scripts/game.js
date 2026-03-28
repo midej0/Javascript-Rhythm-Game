@@ -1,9 +1,25 @@
 class Note {
+    type = 0;
+
     constructor(lane, time) {
         this.time = time;
         this.lane = lane;
         this.xPosition = spawnXPositions[lane];
         this.yPosition = spawnYPosition;
+    }
+}
+
+class HoldNote {
+    type = 1;
+
+    constructor(lane, time, yPosition, id, holdTime, endNote) {
+        this.time = time;
+        this.lane = lane;
+        this.xPosition = spawnXPositions[lane];
+        this.yPosition = yPosition;
+        this.id = id;
+        this.holdTime = holdTime;
+        this.endNote = endNote;
     }
 }
 
@@ -38,6 +54,8 @@ let fallSpeed = 1400;
 //Smallest dist is the maximum amount of pixels a note can be behind the perfectYpos before it is ignored.
 let smallestDist = -noteSize;
 let timeToPerfect = ((perfectYpos - spawnYPosition) / fallSpeed) * 1000;
+//The id of the hold notes, lets the begining and end portions of a hold note know where they are.
+let holdNoteId = 0;
 
 //Cosmetics
 let noteColors = [
@@ -47,6 +65,7 @@ let noteColors = [
     new RGBA(255.0, 255.0, 0.0, 1.0)
 ];
 let backgroundDim = 0.4;
+let receptorLineWidth = 10;
 
 //Scoring 
 //In milliseconds deviated from the time the note is supposed to be clicked
@@ -65,7 +84,7 @@ let scoreTable = [
 //Used for click note detection, one for each lane
 let interactable = [true, true, true, true];
 let keysHeld = [false, false, false, false];
-//Keys and lanes pairs
+//Key and lane pairs
 const keys = {
     d: 0,
     f: 1,
@@ -139,7 +158,14 @@ function UpdateTime() {
 function TickSpawning() {
     if (noteIndex < chartLength) {
         if (chart[noteIndex].time - timeToPerfect <= timeElapsed) {
-            SpawnNote(chart[noteIndex].lane, chart[noteIndex].time);
+            switch (chart[noteIndex].type) {
+                case 0:
+                    SpawnNote(chart[noteIndex].lane, chart[noteIndex].time);
+                    break;
+                case 1:
+                    SpawnHoldNote(chart[noteIndex].lane, chart[noteIndex].time, chart[noteIndex].endTime);
+                    break;
+            }
             noteIndex++;
             TickSpawning();
         }
@@ -154,6 +180,12 @@ function TickNotes() {
 
 function TickDeletion() {
     notes.forEach((e, i) => {
+        if (e.yPosition >= perfectYpos + (noteSize / 2)) {
+            console.log(timeElapsed);
+            console.log(e.endNote);
+            DeleteNote(i);
+        }
+
         if (e.yPosition >= canvas.height + (noteSize / 2)) {
             DeleteNote(i);
         }
@@ -175,7 +207,7 @@ function DrawCanvas() {
             ctx.fillStyle = "turquoise"
             DrawSquare(e, spawnYPosition, 110)
         }
-        ctx.lineWidth = 10;
+        ctx.lineWidth = receptorLineWidth;
         ctx.strokeStyle = "white";
         DrawCircle(e, perfectYpos, noteSize / 2, false)
     });
@@ -203,6 +235,14 @@ function DrawCanvas() {
 
 function SpawnNote(lane, time) {
     notes.push(new Note(lane, time));
+}
+
+function SpawnHoldNote(lane, startTime, endTime) {
+    let holdTime = endTime - startTime;
+    notes.push(new HoldNote(lane, startTime, spawnYPosition, holdNoteId, holdTime, false));
+    let endSpawnYPos = spawnYPosition - ((holdTime / 1000) * fallSpeed);
+    notes.push(new HoldNote(lane, endTime, endSpawnYPos, holdNoteId, holdNoteId, true));
+    holdNoteId++;
 }
 
 function DeleteNote(index) {
@@ -239,6 +279,7 @@ function Input(lane) {
     notes.forEach((e, i) => {
         let timeDifference = e.time - timeElapsed;
         let distance = perfectYpos - e.yPosition;
+        //Some yummy conditions
         if (e.lane == lane && timeDifference < leastTimeDifference && distance >= smallestDist && timeDifference <= badRange) {
             leastTimeDifference = timeDifference;
             closestNoteIndex = i;
