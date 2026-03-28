@@ -180,12 +180,6 @@ function TickNotes() {
 
 function TickDeletion() {
     notes.forEach((e, i) => {
-        if (e.yPosition >= perfectYpos + (noteSize / 2)) {
-            console.log(timeElapsed);
-            console.log(e.endNote);
-            DeleteNote(i);
-        }
-
         if (e.yPosition >= canvas.height + (noteSize / 2)) {
             DeleteNote(i);
         }
