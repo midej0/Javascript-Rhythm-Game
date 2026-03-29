@@ -56,7 +56,6 @@ let smallestDist = -noteSize;
 let timeToPerfect = ((perfectYpos - spawnYPosition) / fallSpeed) * 1000;
 //The id of the hold notes, lets the begining and end portions of a hold note know where they are.
 let holdNoteId = 0;
-let holdStartNotes = [];
 
 //Cosmetics
 let noteColors = [
@@ -147,7 +146,6 @@ function Tick() {
     TickNotes();
     TickDeletion();
     DrawCanvas();
-    holdStartNotes = [];
     window.requestAnimationFrame(Tick);
 }
 
@@ -196,12 +194,10 @@ function DrawCanvas() {
     notes.forEach(e => {
         if (e.type == 1) {
             if (e.endNote) {
-                let startNote = notes[GetStartNoteIndex(e.id)];
-                ctx.fillStyle = "white";
-                ctx.fillRect(e.xPosition - (noteSize / 2), e.yPosition, noteSize, startNote.yPosition - e.yPosition);
-                console.log(e.id);
-            } else {
-                holdStartNotes.push(e);
+                let startYPosition = GetStartNote(e.id).yPosition;
+                let color = noteColors[e.lane];
+                ctx.fillStyle = `rgba(${color.red / 2}, ${color.green / 2}, ${color.blue / 2}, ${color.alpha / 2})`;
+                ctx.fillRect(e.xPosition - (noteSize / 2), e.yPosition, noteSize, startYPosition - e.yPosition);
             }
         }
     });
@@ -244,16 +240,8 @@ function DrawCanvas() {
     }
 }
 
-function GetStartNoteIndex(id) {
-    //Fix Error When Trying To Return During The For Each
-    let index = null;
-    holdStartNotes.forEach((e, i) => {
-        if (e.id == id) {
-            index = i;
-            //return i;
-        }
-    });
-    return index;
+function GetStartNote(id) {
+    return notes.find(n => n.id === id && !n.endNote)
 }
 
 function SpawnNote(lane, time) {
@@ -270,14 +258,14 @@ function SpawnHoldNote(lane, startTime, endTime) {
 
 function DeleteNote(index) {
     let note = notes[index];
-    switch (note.type){
+    switch (note.type) {
         case 0:
             notes.splice(index, 1);
             break;
         case 1:
-            if(note.endNote){
+            if (note.endNote) {
                 notes.splice(index, 1);
-                notes.splice(GetStartNoteIndex(note.id), 1);
+                notes.splice(notes.indexOf(GetStartNote(note.id)), 1);
             }
             break;
     }
