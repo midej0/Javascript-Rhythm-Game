@@ -11,6 +11,7 @@ class Note {
 
 class HoldNote {
     type = 1;
+    scored = false;
 
     constructor(lane, time, yPosition, id, holdTime, endNote) {
         this.time = time;
@@ -34,7 +35,7 @@ class RGBA {
 
 //Time Handling
 let deltaTime;
-let programStart = Date.now();
+let programStart;
 let timeElapsed;
 let lastTime;
 
@@ -43,6 +44,9 @@ let song;
 let chart;
 let chartLength;
 let noteIndex = 0;
+let running = false;
+let audio;
+let offset;
 
 //Notes
 let spawnXPositions = [];
@@ -125,9 +129,17 @@ async function Setup(songPath) {
     await GetSong(songPath);
     chart = song.chart.notes;
     chartLength = chart.length;
+    offset = song.chart.offset;
     document.getElementById("main").style.backgroundImage = 'linear-gradient(rgba(0, 0, 0, ' + backgroundDim + '), rgba(0, 0, 0, ' + backgroundDim + ')), url(' + song.songInfo.backgroundImage + ')';
     SetSpawnXPositions();
     BindInput();
+}
+
+function Start() {
+    programStart = Date.now();
+    audio = new Audio(song.songInfo.audio);
+    audio.volume = 0.1;
+    audio.play();
     window.requestAnimationFrame(Tick);
 }
 
@@ -157,7 +169,7 @@ function UpdateTime() {
 
 function TickSpawning() {
     if (noteIndex < chartLength) {
-        if (chart[noteIndex].time - timeToPerfect <= timeElapsed) {
+        if (chart[noteIndex].time + offset - timeToPerfect <= timeElapsed) {
             switch (chart[noteIndex].type) {
                 case 0:
                     SpawnNote(chart[noteIndex].lane, chart[noteIndex].time);
@@ -196,7 +208,7 @@ function DrawCanvas() {
             if (e.endNote) {
                 let startYPosition = GetStartNote(e.id).yPosition;
                 let color = noteColors[e.lane];
-                ctx.fillStyle = `rgba(${color.red / 2}, ${color.green / 2}, ${color.blue / 2}, ${color.alpha / 2})`;
+                ctx.fillStyle = `rgba(${color.red / 2}, ${color.green / 2}, ${color.blue / 2}, ${color.alpha * 0.6})`;
                 ctx.fillRect(e.xPosition - (noteSize / 2), e.yPosition, noteSize, startYPosition - e.yPosition);
             }
         }
@@ -299,7 +311,7 @@ function Input(lane) {
     let leastTimeDifference = Number.POSITIVE_INFINITY;
 
     notes.forEach((e, i) => {
-        let timeDifference = e.time - timeElapsed;
+        let timeDifference = e.time + offset - timeElapsed;
         let distance = perfectYpos - e.yPosition;
         //Some yummy conditions
         if (e.lane == lane && timeDifference < leastTimeDifference && distance >= smallestDist && timeDifference <= badRange) {
@@ -338,6 +350,12 @@ function BindInput() {
         if (keyName === "k" && interactable[keys["k"]]) {
             Input(keys["k"]);
             keysHeld[keys["k"]] = true;
+        }
+        if (keyName === "q") {
+            if (!running) {
+                Start();
+                running = true;
+            }
         }
     });
 

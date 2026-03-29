@@ -9,9 +9,9 @@
         "previewEnd": 70000
     },
     "chart": {
-        "bpm": "120",
-        "offset": "0",
-        "lanes": "4",
+        "bpm": 120,
+        "offset": 0,
+        "lanes": 4,
         "notes": [
             {"type": 0, "time": 3000, "lane": 0},
             {"type": 0, "time": 3400, "lane": 1},
