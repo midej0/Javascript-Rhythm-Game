@@ -13,7 +13,8 @@
         "offset": "0",
         "lanes": "4",
         "notes": [
-            {"type": 1, "time": 3000, "lane": 0, "endTime": 4000}
+            {"type": 1, "time": 3000, "lane": 0, "endTime": 5000},
+            {"type": 1, "time": 3000, "lane": 1, "endTime": 5000}
         ]
     }
 }

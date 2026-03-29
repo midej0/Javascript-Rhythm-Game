@@ -56,6 +56,7 @@ let smallestDist = -noteSize;
 let timeToPerfect = ((perfectYpos - spawnYPosition) / fallSpeed) * 1000;
 //The id of the hold notes, lets the begining and end portions of a hold note know where they are.
 let holdNoteId = 0;
+let holdStartNotes = [];
 
 //Cosmetics
 let noteColors = [
@@ -100,7 +101,7 @@ let drawOkayrange = true;
 let drawGreatrange = true;
 let drawPerfectRange = true;
 
-//Makees it possible to debug during runtime
+//Makes it possible to debug during runtime
 globalThis.drawSpawnPoints;
 globalThis.drawScoringRanges;
 globalThis.drawBadRange;
@@ -146,6 +147,7 @@ function Tick() {
     TickNotes();
     TickDeletion();
     DrawCanvas();
+    holdStartNotes = [];
     window.requestAnimationFrame(Tick);
 }
 
@@ -190,6 +192,21 @@ function DrawCanvas() {
     //Clears the canvas
     canvas.width = canvas.width;
 
+    //Draws the connecting rectangle between start/end of all hold notes
+    notes.forEach(e => {
+        if (e.type == 1) {
+            if (e.endNote) {
+                let startNote = notes[GetStartNoteIndex(e.id)];
+                ctx.fillStyle = "white";
+                ctx.fillRect(e.xPosition - (noteSize / 2), e.yPosition, noteSize, startNote.yPosition - e.yPosition);
+                console.log(e.id);
+            } else {
+                holdStartNotes.push(e);
+            }
+        }
+    });
+
+    //Draws the notes and start/end points of a hold note
     notes.forEach(e => {
         let noteColor = noteColors[e.lane];
         ctx.fillStyle = `rgba(${noteColor.red}, ${noteColor.green}, ${noteColor.blue}, ${noteColor.alpha})`;
@@ -227,6 +244,18 @@ function DrawCanvas() {
     }
 }
 
+function GetStartNoteIndex(id) {
+    //Fix Error When Trying To Return During The For Each
+    let index = null;
+    holdStartNotes.forEach((e, i) => {
+        if (e.id == id) {
+            index = i;
+            //return i;
+        }
+    });
+    return index;
+}
+
 function SpawnNote(lane, time) {
     notes.push(new Note(lane, time));
 }
@@ -240,7 +269,18 @@ function SpawnHoldNote(lane, startTime, endTime) {
 }
 
 function DeleteNote(index) {
-    notes.splice(index, 1);
+    let note = notes[index];
+    switch (note.type){
+        case 0:
+            notes.splice(index, 1);
+            break;
+        case 1:
+            if(note.endNote){
+                notes.splice(index, 1);
+                notes.splice(GetStartNoteIndex(note.id), 1);
+            }
+            break;
+    }
 }
 
 function DrawCircle(x, y, radius, filled) {
