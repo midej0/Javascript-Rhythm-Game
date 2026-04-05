@@ -88,7 +88,12 @@ let scoreTable = [
 //Input
 //Used for click note detection, one for each lane
 let interactable = [true, true, true, true];
+//For hold note detection, one for each lane.
 let keysHeld = [false, false, false, false];
+//If the timeHeld array should add time, one for each lane.
+let shouldCount = [false, false, false, false];
+//The time in ms the player has held the hold note, one for each lane.
+let timeHeld = [0, 0, 0, 0];
 //Key and lane pairs
 const keys = {
     d: 0,
@@ -231,13 +236,11 @@ function DrawCanvas() {
 
 function DrawHoldConnector() {
     notes.forEach(e => {
-        if (e.type == 1) {
-            if (e.endNote) {
-                let startYPosition = GetStartNote(e.id).yPosition;
-                let color = noteColors[e.lane];
-                ctx.fillStyle = `rgba(${color.red * 0.6}, ${color.green * 0.6}, ${color.blue * 0.6}, ${color.alpha * 0.7})`;
-                ctx.fillRect(e.xPosition - (noteSize / 2), e.yPosition, noteSize, startYPosition - e.yPosition);
-            }
+        if (e.endNote) {
+            let startYPosition = GetStartNote(e.id).yPosition;
+            let color = noteColors[e.lane];
+            ctx.fillStyle = `rgba(${color.red * 0.6}, ${color.green * 0.6}, ${color.blue * 0.6}, ${color.alpha * 0.7})`;
+            ctx.fillRect(e.xPosition - (noteSize / 2), e.yPosition, noteSize, startYPosition - e.yPosition);
         }
     });
 }
@@ -303,11 +306,6 @@ function DrawCircle(x, y, radius, filled) {
     }
 }
 
-//A custom draw square function that puts the position at the center of the square
-function DrawSquare(x, y, size) {
-    ctx.fillRect(x - (size / 2), y - (size / 2), size, size);
-}
-
 function SetSpawnXPositions() {
     let lanes = song.chart.lanes
     for (let i = 0; i < lanes; i++) {
@@ -317,6 +315,38 @@ function SetSpawnXPositions() {
 }
 
 function Input(lane) {
+    let [closestNoteIndex, leastTimeDifference] = GetClosestNoteIndex(lane);
+
+    let note = notes[closestNoteIndex];
+
+    if (closestNoteIndex < chartLength) {
+        switch (note.type) {
+            case 0:
+                console.log(GetScore(Math.abs(leastTimeDifference)));
+                DeleteNote(closestNoteIndex);
+                break;
+            case 1:
+                if (!note.scored) {
+                    console.log(GetScore(Math.abs(leastTimeDifference)));
+                    note.scored = true;
+                }
+                break;
+        }
+    }
+    interactable[lane] = false;
+}
+
+function ReleaseInput(lane){
+    let [closestNoteIndex, leastTimeDifference] = GetClosestNoteIndex(lane);
+    let note = notes[closestNoteIndex];
+
+    if(closestNoteIndex < chartLength && note.type == 1 && note.endNote){
+        DeleteNote(closestNoteIndex);
+    }
+}
+
+//returns the closest note index and time difference from when the note is clicked and it's actual click time.
+function GetClosestNoteIndex(lane) {
     let closestNoteIndex = Number.POSITIVE_INFINITY;
     let leastTimeDifference = Number.POSITIVE_INFINITY;
 
@@ -330,20 +360,7 @@ function Input(lane) {
         }
     });
 
-    let note = notes[closestNoteIndex];
-
-    if (closestNoteIndex < chartLength) {
-        if (note.type == 0) {
-            console.log(GetScore(Math.abs(leastTimeDifference)));
-            DeleteNote(closestNoteIndex);
-        } else if(note.type == 1){
-            if(!note.scored){
-                console.log(GetScore(Math.abs(leastTimeDifference)));
-                note.scored = true;
-            }
-        }
-    }
-    interactable[lane] = false;
+    return [closestNoteIndex, leastTimeDifference];
 }
 
 function GetScore(timeDifference) {
@@ -364,8 +381,8 @@ function BindInput() {
         }
     });
 
-    function SendInput(keyName){
-        if(interactable[keys[keyName]]){
+    function SendInput(keyName) {
+        if (interactable[keys[keyName]]) {
             Input(keys[keyName]);
             keysHeld[keys[keyName]] = true;
         }
@@ -375,8 +392,9 @@ function BindInput() {
         KeyReleased(event.key);
     });
 
-    function KeyReleased(keyName){
+    function KeyReleased(keyName) {
         interactable[keys[keyName]] = true;
         keysHeld[keys[keyName]] = false;
+        ReleaseInput(keys[keyName]);
     }
 }
