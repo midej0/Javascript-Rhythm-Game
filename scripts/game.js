@@ -162,6 +162,7 @@ async function GetSong(songPath) {
 
 function Tick() {
     UpdateTime();
+    UpdateTimeHeld();
     TickSpawning();
     TickNotes();
     TickDeletion();
@@ -173,6 +174,14 @@ function UpdateTime() {
     lastTime = timeElapsed ?? 0;
     timeElapsed = Date.now() - programStart;
     deltaTime = (timeElapsed - lastTime) / 1000;
+}
+
+function UpdateTimeHeld() {
+    for(let i = 0; i < timeHeld.length; i++){
+        if(shouldCount[i] && keysHeld[i]){
+            timeHeld[i] += deltaTime * 1000;
+        }
+    }
 }
 
 function TickSpawning() {
@@ -195,13 +204,17 @@ function TickSpawning() {
 function TickNotes() {
     notes.forEach(e => {
         e.yPosition += fallSpeed * deltaTime;
+        if(!e.endNote && !e.scored && e.yPosition >= perfectYpos - smallestDist){
+            shouldCount[e.lane] = true;
+            scored = true;
+        }
     });
 }
 
 function TickDeletion() {
     notes.forEach((e, i) => {
         if (e.yPosition >= canvas.height + (noteSize / 2)) {
-            //DeleteNote(i);
+            DeleteNote(i);
         }
     });
 }
@@ -244,7 +257,7 @@ function DrawHoldConnector() {
 
             ctx.fillStyle = `rgba(${color.red * 0.6}, ${color.green * 0.6}, ${color.blue * 0.6}, ${color.alpha * 0.9})`;
 
-            if (GetStartNote(e.id).scored && keysHeld[e.lane] && e.yPosition < perfectYpos) {
+            if (GetStartNote(e.id).scored && keysHeld[e.lane] && e.yPosition < perfectYpos - smallestDist / 2) {
                 ctx.fillRect(e.xPosition - (noteSize / 2), e.yPosition, noteSize, perfectYpos - e.yPosition);
                 //draws a half circle so it doesn't overlap with the connector.
                 ctx.beginPath();
@@ -261,7 +274,7 @@ function DrawNotes() {
     notes.forEach(e => {
         let noteColor = noteColors[e.lane];
         ctx.fillStyle = `rgba(${noteColor.red}, ${noteColor.green}, ${noteColor.blue}, ${noteColor.alpha})`;
-        if(!e.scored){
+        if (!e.scored) {
             DrawCircle(e.xPosition, e.yPosition, noteSize / 2, true);
         }
     });
@@ -310,6 +323,8 @@ function DeleteNote(index) {
             break;
         case 1:
             if (note.endNote) {
+                shouldCount[note.lane] = false;
+                timeHeld[note.lane] = 0;
                 notes.splice(index, 1);
                 notes.splice(notes.indexOf(GetStartNote(note.id)), 1);
             }
@@ -348,6 +363,7 @@ function Input(lane) {
                 break;
             case 1:
                 if (!note.scored) {
+                    shouldCount[note.lane] = true;
                     lastScore = GetScore(Math.abs(leastTimeDifference));
                     note.scored = true;
                 }
@@ -362,6 +378,13 @@ function ReleaseInput(lane) {
     let note = notes[closestNoteIndex];
 
     if (closestNoteIndex < Number.POSITIVE_INFINITY && note.type == 1 && note.endNote) {
+        /* console.log(`held note for ${timeHeld[note.lane]}ms of ${note.holdTime}ms`); */
+        if(note.holdTime - timeHeld[note.lane] <= missRange){
+            lastScore = GetScore(Math.abs(note.holdTime - timeHeld[note.lane]));
+        }else{
+            lastScore = "Miss";
+        }
+
         DeleteNote(closestNoteIndex);
     }
 }
