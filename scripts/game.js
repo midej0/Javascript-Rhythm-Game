@@ -71,6 +71,10 @@ let noteColors = [
 ];
 let backgroundDim = 1;
 let receptorLineWidth = 15;
+let baseTextSize = 90;
+let bigTextSize = 120;
+let textSizeDecreaseSpeed = 70;
+let textSize;
 
 //Scoring 
 //In milliseconds deviated from the time the note is supposed to be clicked
@@ -84,7 +88,7 @@ let scoreTable = [
     { limit: okayRange, label: "Okay" },
     { limit: missRange, label: "Miss" }
 ]
-let lastScore = "";
+let lastGrade = "";
 
 //Input
 //Used for click note detection, one for each lane
@@ -166,6 +170,7 @@ function Tick() {
     TickSpawning();
     TickNotes();
     TickDeletion();
+    TickRatingText();
     DrawCanvas();
     window.requestAnimationFrame(Tick);
 }
@@ -207,6 +212,7 @@ function TickNotes() {
         if(!e.endNote && !e.scored && e.yPosition >= perfectYpos - smallestDist){
             shouldCount[e.lane] = true;
             scored = true;
+            ChangeGradeText("Miss");
         }
     });
 }
@@ -214,9 +220,17 @@ function TickNotes() {
 function TickDeletion() {
     notes.forEach((e, i) => {
         if (e.yPosition >= canvas.height + (noteSize / 2)) {
+            ChangeGradeText("Miss");
             DeleteNote(i);
         }
     });
+}
+
+function TickRatingText(){
+    if(textSize > baseTextSize){
+        textSize -= textSizeDecreaseSpeed * deltaTime;
+    }
+    textSize = (textSize < baseTextSize)? baseTextSize : textSize;
 }
 
 function DrawCanvas() {
@@ -294,9 +308,9 @@ function DrawReceptor() {
 
 function DrawText() {
     ctx.fillStyle = "white";
-    ctx.font = "80px sans-serif";
+    ctx.font = `${textSize}px sans-serif`;
     ctx.textAlign = "center";
-    ctx.fillText(lastScore, canvas.width / 2, perfectYpos - noteSize);
+    ctx.fillText(lastGrade, canvas.width / 2, perfectYpos - noteSize);
 }
 
 function GetStartNote(id) {
@@ -358,13 +372,13 @@ function Input(lane) {
     if (closestNoteIndex < Number.POSITIVE_INFINITY) {
         switch (note.type) {
             case 0:
-                lastScore = GetScore(Math.abs(leastTimeDifference));
+                ChangeGradeText(GetScore(Math.abs(leastTimeDifference)));
                 DeleteNote(closestNoteIndex);
                 break;
             case 1:
                 if (!note.scored) {
                     shouldCount[note.lane] = true;
-                    lastScore = GetScore(Math.abs(leastTimeDifference));
+                    ChangeGradeText(GetScore(Math.abs(leastTimeDifference)));
                     note.scored = true;
                 }
                 break;
@@ -380,9 +394,9 @@ function ReleaseInput(lane) {
     if (closestNoteIndex < Number.POSITIVE_INFINITY && note.type == 1 && note.endNote) {
         /* console.log(`held note for ${timeHeld[note.lane]}ms of ${note.holdTime}ms`); */
         if(note.holdTime - timeHeld[note.lane] <= missRange){
-            lastScore = GetScore(Math.abs(note.holdTime - timeHeld[note.lane]));
+            ChangeGradeText(GetScore(Math.abs(note.holdTime - timeHeld[note.lane])));
         }else{
-            lastScore = "Miss";
+            ChangeGradeText("Miss");
         }
 
         DeleteNote(closestNoteIndex);
@@ -405,6 +419,11 @@ function GetClosestNoteIndex(lane) {
     });
 
     return [closestNoteIndex, leastTimeDifference];
+}
+
+function ChangeGradeText(grade){
+    lastGrade = grade;
+    textSize = bigTextSize;
 }
 
 function GetScore(timeDifference) {

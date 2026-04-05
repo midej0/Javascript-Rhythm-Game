@@ -11,11 +11,11 @@
 - [X] Hold note scoring
 
 - [X] Add text for scoring
-    - [ ] Add effects such as size and alpha change
+    - [X] Add effects such as size and alpha change
 
 - [ ] Add counter to spamming
     - [ ] Check if the input missed completeley and block input
 
 - [ ] Fix chartlength variable for better handling in the scoring functions
 
-- [ ] Add miss score for notes that go off screen
+- [X] Add miss score for notes that go off screen
