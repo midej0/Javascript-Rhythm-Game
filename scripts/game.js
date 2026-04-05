@@ -54,6 +54,7 @@ let notes = [];
 let spawnYPosition = -50;
 let perfectYpos = 1400;
 let noteSize = 175;
+// filip speed 3000
 let fallSpeed = 1400;
 //Smallest dist is the maximum amount of pixels a note can be behind the perfectYpos before it is ignored.
 let smallestDist = -noteSize;
@@ -63,20 +64,20 @@ let holdNoteId = 0;
 
 //Cosmetics
 let noteColors = [
-    new RGBA(255.0, 0.0, 0.0, 1.0),
-    new RGBA(0.0, 255.0, 0.0, 1.0),
-    new RGBA(0.0, 0.0, 255.0, 1.0),
-    new RGBA(255.0, 255.0, 0.0, 1.0)
+    new RGBA(26.0, 44.0, 121.0, 1.0),
+    new RGBA(232.0, 5.0, 102.0, 1.0),
+    new RGBA(255.0, 141.0, 104.0, 1.0),
+    new RGBA(244.0, 234.0, 188.0, 1.0)
 ];
-let backgroundDim = 0.4;
-let receptorLineWidth = 10;
+let backgroundDim = 1;
+let receptorLineWidth = 15;
 
 //Scoring 
 //In milliseconds deviated from the time the note is supposed to be clicked
 let perfectRange = 50;
-let greatRange = 100;
-let okayRange = 150;
-let badRange = 250;
+let greatRange = 75;
+let okayRange = 100;
+let badRange = 150;
 let scoreTable = [
     { limit: perfectRange, label: "Perfect" },
     { limit: greatRange, label: "Great" },
@@ -130,8 +131,9 @@ async function Setup(songPath) {
     chart = song.chart.notes;
     chartLength = chart.length;
     offset = song.chart.offset;
-    document.getElementById("main").style.backgroundImage = 'linear-gradient(rgba(0, 0, 0, ' + backgroundDim + '), rgba(0, 0, 0, ' + backgroundDim + ')), url(' + song.songInfo.backgroundImage + ')';
+    document.getElementById("main").style.backgroundImage = `linear-gradient(rgba(0, 0, 0, ${backgroundDim}), rgba(0, 0, 0, ${backgroundDim})), url(${song.songInfo.backgroundImage})`;
     SetSpawnXPositions();
+    DrawReceptor();
     BindInput();
 }
 
@@ -202,25 +204,53 @@ function DrawCanvas() {
     //Clears the canvas
     canvas.width = canvas.width;
 
-    //Draws the connecting rectangle between start/end of all hold notes
+    DrawHoldConnector();
+    DrawNotes();
+    DrawReceptor();
+
+    if (drawBadRange && drawScoringRanges) {
+        ctx.fillStyle = "rgba(0.0, 0.0, 0.0, 0.5)";
+        ctx.fillRect(0, perfectYpos - (badRange / 1000) * fallSpeed, canvas.width, (badRange / 1000) * fallSpeed * 2);
+    }
+
+    if (drawOkayrange && drawScoringRanges) {
+        ctx.fillStyle = "rgba(0.0, 0.0, 255.0, 0.5)";
+        ctx.fillRect(0, perfectYpos - (okayRange / 1000) * fallSpeed, canvas.width, (okayRange / 1000) * fallSpeed * 2);
+    }
+
+    if (drawGreatrange && drawScoringRanges) {
+        ctx.fillStyle = "rgba(0.0, 255.0, 0.0, 0.5)";
+        ctx.fillRect(0, perfectYpos - (greatRange / 1000) * fallSpeed, canvas.width, (greatRange / 1000) * fallSpeed * 2);
+    }
+
+    if (drawPerfectRange && drawScoringRanges) {
+        ctx.fillStyle = "rgba(255.0, 0.0, 0.0, 0.5)";
+        ctx.fillRect(0, perfectYpos - (perfectRange / 1000) * fallSpeed, canvas.width, (perfectRange / 1000) * fallSpeed * 2);
+    }
+}
+
+function DrawHoldConnector() {
     notes.forEach(e => {
         if (e.type == 1) {
             if (e.endNote) {
                 let startYPosition = GetStartNote(e.id).yPosition;
                 let color = noteColors[e.lane];
-                ctx.fillStyle = `rgba(${color.red / 2}, ${color.green / 2}, ${color.blue / 2}, ${color.alpha * 0.6})`;
+                ctx.fillStyle = `rgba(${color.red * 0.6}, ${color.green * 0.6}, ${color.blue * 0.6}, ${color.alpha * 0.7})`;
                 ctx.fillRect(e.xPosition - (noteSize / 2), e.yPosition, noteSize, startYPosition - e.yPosition);
             }
         }
     });
+}
 
-    //Draws the notes and start/end points of a hold note
+function DrawNotes() {
     notes.forEach(e => {
         let noteColor = noteColors[e.lane];
         ctx.fillStyle = `rgba(${noteColor.red}, ${noteColor.green}, ${noteColor.blue}, ${noteColor.alpha})`;
         DrawCircle(e.xPosition, e.yPosition, noteSize / 2, true);
     });
+}
 
+function DrawReceptor() {
     spawnXPositions.forEach(e => {
         if (drawSpawnPoints == true) {
             ctx.fillStyle = "turquoise"
@@ -230,26 +260,6 @@ function DrawCanvas() {
         ctx.strokeStyle = "white";
         DrawCircle(e, perfectYpos, noteSize / 2, false)
     });
-
-    if (drawBadRange && drawScoringRanges) {
-        ctx.fillStyle = "rgba(0.0, 0.0, 0.0, 0.5";
-        ctx.fillRect(0, perfectYpos - (badRange / 1000) * fallSpeed, canvas.width, (badRange / 1000) * fallSpeed * 2);
-    }
-
-    if (drawOkayrange && drawScoringRanges) {
-        ctx.fillStyle = "rgba(0.0, 0.0, 255.0, 0.5";
-        ctx.fillRect(0, perfectYpos - (okayRange / 1000) * fallSpeed, canvas.width, (okayRange / 1000) * fallSpeed * 2);
-    }
-
-    if (drawGreatrange && drawScoringRanges) {
-        ctx.fillStyle = "rgba(0.0, 255.0, 0.0, 0.5";
-        ctx.fillRect(0, perfectYpos - (greatRange / 1000) * fallSpeed, canvas.width, (greatRange / 1000) * fallSpeed * 2);
-    }
-
-    if (drawPerfectRange && drawScoringRanges) {
-        ctx.fillStyle = "rgba(255.0, 0.0, 0.0, 0.5";
-        ctx.fillRect(0, perfectYpos - (perfectRange / 1000) * fallSpeed, canvas.width, (perfectRange / 1000) * fallSpeed * 2);
-    }
 }
 
 function GetStartNote(id) {
@@ -264,7 +274,7 @@ function SpawnHoldNote(lane, startTime, endTime) {
     let holdTime = endTime - startTime;
     notes.push(new HoldNote(lane, startTime, spawnYPosition, holdNoteId, holdTime, false));
     let endSpawnYPos = spawnYPosition - ((holdTime / 1000) * fallSpeed);
-    notes.push(new HoldNote(lane, endTime, endSpawnYPos, holdNoteId, holdNoteId, true));
+    notes.push(new HoldNote(lane, endTime, endSpawnYPos, holdNoteId, holdTime, true));
     holdNoteId++;
 }
 
@@ -319,9 +329,19 @@ function Input(lane) {
             closestNoteIndex = i;
         }
     });
+
+    let note = notes[closestNoteIndex];
+
     if (closestNoteIndex < chartLength) {
-        console.log(GetScore(Math.abs(leastTimeDifference)));
-        DeleteNote(closestNoteIndex);
+        if (note.type == 0) {
+            console.log(GetScore(Math.abs(leastTimeDifference)));
+            DeleteNote(closestNoteIndex);
+        } else if(note.type == 1){
+            if(!note.scored){
+                console.log(GetScore(Math.abs(leastTimeDifference)));
+                note.scored = true;
+            }
+        }
     }
     interactable[lane] = false;
 }
@@ -334,23 +354,8 @@ function BindInput() {
     document.addEventListener("keydown", (event) => {
         const keyName = event.key;
 
-        //This is so goofy
-        if (keyName === "d" && interactable[keys["d"]]) {
-            Input(keys["d"]);
-            keysHeld[keys["d"]] = true;
-        }
-        if (keyName === "f" && interactable[keys["f"]]) {
-            Input(keys["f"]);
-            keysHeld[keys["f"]] = true;
-        }
-        if (keyName === "j" && interactable[keys["j"]]) {
-            Input(keys["j"]);
-            keysHeld[keys["j"]] = true;
-        }
-        if (keyName === "k" && interactable[keys["k"]]) {
-            Input(keys["k"]);
-            keysHeld[keys["k"]] = true;
-        }
+        SendInput(keyName);
+
         if (keyName === "q") {
             if (!running) {
                 Start();
@@ -359,25 +364,19 @@ function BindInput() {
         }
     });
 
-    document.addEventListener("keyup", (event) => {
-        const keyName = event.key;
+    function SendInput(keyName){
+        if(interactable[keys[keyName]]){
+            Input(keys[keyName]);
+            keysHeld[keys[keyName]] = true;
+        }
+    }
 
-        //This is so goofy
-        if (keyName === "d") {
-            interactable[keys["d"]] = true;
-            keysHeld[keys["d"]] = false;
-        }
-        if (keyName === "f") {
-            interactable[keys["f"]] = true;
-            keysHeld[keys["f"]] = false;
-        }
-        if (keyName === "j") {
-            interactable[keys["j"]] = true;
-            keysHeld[keys["j"]] = false;
-        }
-        if (keyName === "k") {
-            interactable[keys["k"]] = true;
-            keysHeld[keys["k"]] = false;
-        }
+    document.addEventListener("keyup", (event) => {
+        KeyReleased(event.key);
     });
+
+    function KeyReleased(keyName){
+        interactable[keys[keyName]] = true;
+        keysHeld[keys[keyName]] = false;
+    }
 }

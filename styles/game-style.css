@@ -37,8 +37,9 @@ footer {
 
 main {
     flex: 1;
+    filter: brightness(100%);
     background-position: center;
-    background-size: contain;
+    background-size: cover;
     background-repeat: no-repeat;
     display: flex;
     justify-content: space-around;
