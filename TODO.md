@@ -6,9 +6,14 @@
     - [X] Add endnote detection
     - [ ] Add hold counting
 
-- [ ] Rewrite Bad as Miss
+- [X] Rewrite Bad as Miss
 
 - [ ] Hold note scoring
 
+- [X] Add text for scoring
+    - [ ] Add effects such as size and alpha change
+
 - [ ] Add counter to spamming
-    - [ ] Check if the input missed completley and block input
+    - [ ] Check if the input missed completeley and block input
+
+- [ ] Fix chartlength variable for better handling in the scoring functions

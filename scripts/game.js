@@ -77,13 +77,14 @@ let receptorLineWidth = 15;
 let perfectRange = 50;
 let greatRange = 75;
 let okayRange = 100;
-let badRange = 150;
+let missRange = 150;
 let scoreTable = [
     { limit: perfectRange, label: "Perfect" },
     { limit: greatRange, label: "Great" },
     { limit: okayRange, label: "Okay" },
-    { limit: badRange, label: "Bad" }
+    { limit: missRange, label: "Miss" }
 ]
+let lastScore = "";
 
 //Input
 //Used for click note detection, one for each lane
@@ -200,7 +201,7 @@ function TickNotes() {
 function TickDeletion() {
     notes.forEach((e, i) => {
         if (e.yPosition >= canvas.height + (noteSize / 2)) {
-            DeleteNote(i);
+            //DeleteNote(i);
         }
     });
 }
@@ -212,10 +213,11 @@ function DrawCanvas() {
     DrawHoldConnector();
     DrawNotes();
     DrawReceptor();
+    DrawText();
 
     if (drawBadRange && drawScoringRanges) {
         ctx.fillStyle = "rgba(0.0, 0.0, 0.0, 0.5)";
-        ctx.fillRect(0, perfectYpos - (badRange / 1000) * fallSpeed, canvas.width, (badRange / 1000) * fallSpeed * 2);
+        ctx.fillRect(0, perfectYpos - (missRange / 1000) * fallSpeed, canvas.width, (missRange / 1000) * fallSpeed * 2);
     }
 
     if (drawOkayrange && drawScoringRanges) {
@@ -239,8 +241,18 @@ function DrawHoldConnector() {
         if (e.endNote) {
             let startYPosition = GetStartNote(e.id).yPosition;
             let color = noteColors[e.lane];
-            ctx.fillStyle = `rgba(${color.red * 0.6}, ${color.green * 0.6}, ${color.blue * 0.6}, ${color.alpha * 0.7})`;
-            ctx.fillRect(e.xPosition - (noteSize / 2), e.yPosition, noteSize, startYPosition - e.yPosition);
+
+            ctx.fillStyle = `rgba(${color.red * 0.6}, ${color.green * 0.6}, ${color.blue * 0.6}, ${color.alpha * 0.9})`;
+
+            if (GetStartNote(e.id).scored && keysHeld[e.lane] && e.yPosition < perfectYpos) {
+                ctx.fillRect(e.xPosition - (noteSize / 2), e.yPosition, noteSize, perfectYpos - e.yPosition);
+                //draws a half circle so it doesn't overlap with the connector.
+                ctx.beginPath();
+                ctx.arc(e.xPosition, perfectYpos, noteSize / 2, 0, Math.PI);
+                ctx.fill();
+            } else {
+                ctx.fillRect(e.xPosition - (noteSize / 2), e.yPosition, noteSize, startYPosition - e.yPosition);
+            }
         }
     });
 }
@@ -249,7 +261,9 @@ function DrawNotes() {
     notes.forEach(e => {
         let noteColor = noteColors[e.lane];
         ctx.fillStyle = `rgba(${noteColor.red}, ${noteColor.green}, ${noteColor.blue}, ${noteColor.alpha})`;
-        DrawCircle(e.xPosition, e.yPosition, noteSize / 2, true);
+        if(!e.scored){
+            DrawCircle(e.xPosition, e.yPosition, noteSize / 2, true);
+        }
     });
 }
 
@@ -263,6 +277,13 @@ function DrawReceptor() {
         ctx.strokeStyle = "white";
         DrawCircle(e, perfectYpos, noteSize / 2, false)
     });
+}
+
+function DrawText() {
+    ctx.fillStyle = "white";
+    ctx.font = "80px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(lastScore, canvas.width / 2, perfectYpos - noteSize);
 }
 
 function GetStartNote(id) {
@@ -319,15 +340,15 @@ function Input(lane) {
 
     let note = notes[closestNoteIndex];
 
-    if (closestNoteIndex < chartLength) {
+    if (closestNoteIndex < Number.POSITIVE_INFINITY) {
         switch (note.type) {
             case 0:
-                console.log(GetScore(Math.abs(leastTimeDifference)));
+                lastScore = GetScore(Math.abs(leastTimeDifference));
                 DeleteNote(closestNoteIndex);
                 break;
             case 1:
                 if (!note.scored) {
-                    console.log(GetScore(Math.abs(leastTimeDifference)));
+                    lastScore = GetScore(Math.abs(leastTimeDifference));
                     note.scored = true;
                 }
                 break;
@@ -336,11 +357,11 @@ function Input(lane) {
     interactable[lane] = false;
 }
 
-function ReleaseInput(lane){
+function ReleaseInput(lane) {
     let [closestNoteIndex, leastTimeDifference] = GetClosestNoteIndex(lane);
     let note = notes[closestNoteIndex];
 
-    if(closestNoteIndex < chartLength && note.type == 1 && note.endNote){
+    if (closestNoteIndex < Number.POSITIVE_INFINITY && note.type == 1 && note.endNote) {
         DeleteNote(closestNoteIndex);
     }
 }
@@ -354,7 +375,7 @@ function GetClosestNoteIndex(lane) {
         let timeDifference = e.time + offset - timeElapsed;
         let distance = perfectYpos - e.yPosition;
         //Some yummy conditions
-        if (e.lane == lane && timeDifference < leastTimeDifference && distance >= smallestDist && timeDifference <= badRange) {
+        if (e.lane == lane && timeDifference < leastTimeDifference && distance >= smallestDist && timeDifference <= missRange) {
             leastTimeDifference = timeDifference;
             closestNoteIndex = i;
         }
@@ -364,7 +385,7 @@ function GetClosestNoteIndex(lane) {
 }
 
 function GetScore(timeDifference) {
-    return scoreTable.find((item) => timeDifference <= item.limit).label ?? "Unexpected time difference used: " + timeDifference;
+    return scoreTable.find((item) => timeDifference <= item.limit).label;
 }
 
 function BindInput() {
