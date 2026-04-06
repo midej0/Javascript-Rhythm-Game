@@ -91,6 +91,13 @@ let scoreTable = [
 let lastGrade = "";
 
 //Input
+let inputBlocked = false;
+let inputStoredTime = 750;
+let inputsToTrigger = 5;
+//time with no missed inputs to reset the block timer
+let unblockTime = 250;
+let lastBlockTriggerTime;
+let inputs = [];
 //Used for click note detection, one for each lane
 let interactable = [true, true, true, true];
 //For hold note detection, one for each lane.
@@ -167,6 +174,7 @@ async function GetSong(songPath) {
 function Tick() {
     UpdateTime();
     UpdateTimeHeld();
+    TickInputTimers();
     TickSpawning();
     TickNotes();
     TickDeletion();
@@ -182,10 +190,23 @@ function UpdateTime() {
 }
 
 function UpdateTimeHeld() {
-    for(let i = 0; i < timeHeld.length; i++){
-        if(shouldCount[i] && keysHeld[i]){
+    for (let i = 0; i < timeHeld.length; i++) {
+        if (shouldCount[i] && keysHeld[i]) {
             timeHeld[i] += deltaTime * 1000;
         }
+    }
+}
+
+function TickInputTimers() {
+    for (let i = 0; i < inputs.length; i++) {
+        inputs[i] -= deltaTime * 1000;
+        if (inputs[i] <= 0) {
+            inputs.splice(i, 1);
+        }
+    }
+    if(timeElapsed >= lastBlockTriggerTime + unblockTime && inputBlocked){
+        inputBlocked = false;
+        inputs.splice(0, inputs.length);
     }
 }
 
@@ -209,7 +230,7 @@ function TickSpawning() {
 function TickNotes() {
     notes.forEach(e => {
         e.yPosition += fallSpeed * deltaTime;
-        if(!e.endNote && !e.scored && e.yPosition >= perfectYpos - smallestDist){
+        if (!e.endNote && !e.scored && e.yPosition >= perfectYpos - smallestDist && e.type == 1) {
             shouldCount[e.lane] = true;
             e.scored = true;
             ChangeGradeText("Miss");
@@ -219,17 +240,18 @@ function TickNotes() {
 
 function TickDeletion() {
     notes.forEach((e, i) => {
-        if (e.yPosition >= canvas.height + (noteSize / 2) && !e.endNote) {
+        if (e.yPosition >= canvas.height + (noteSize / 2) && !e.scored) {
+            ChangeGradeText("Miss");
             DeleteNote(i);
         }
     });
 }
 
-function TickRatingText(){
-    if(textSize > baseTextSize){
+function TickRatingText() {
+    if (textSize > baseTextSize) {
         textSize -= textSizeDecreaseSpeed * deltaTime;
     }
-    textSize = (textSize < baseTextSize)? baseTextSize : textSize;
+    textSize = (textSize < baseTextSize) ? baseTextSize : textSize;
 }
 
 function DrawCanvas() {
@@ -242,7 +264,7 @@ function DrawCanvas() {
     DrawText();
 
     if (drawBadRange && drawScoringRanges) {
-        ctx.fillStyle = "rgba(0.0, 0.0, 0.0, 0.5)";
+        ctx.fillStyle = "rgba(255.0, 255.0, 255.0, 0.5)";
         ctx.fillRect(0, perfectYpos - (missRange / 1000) * fallSpeed, canvas.width, (missRange / 1000) * fallSpeed * 2);
     }
 
@@ -270,7 +292,7 @@ function DrawHoldConnector() {
 
             ctx.fillStyle = `rgba(${color.red * 0.6}, ${color.green * 0.6}, ${color.blue * 0.6}, ${color.alpha * 0.9})`;
 
-            if (GetStartNote(e.id).scored && keysHeld[e.lane] && e.yPosition < perfectYpos - smallestDist / 2) {
+            if (GetStartNote(e.id).scored && keysHeld[e.lane] && e.yPosition < perfectYpos - smallestDist / 2 && !inputBlocked) {
                 ctx.fillRect(e.xPosition - (noteSize / 2), e.yPosition, noteSize, perfectYpos - e.yPosition);
                 //draws a half circle so it doesn't overlap with the connector.
                 ctx.beginPath();
@@ -368,7 +390,7 @@ function Input(lane) {
 
     let note = notes[closestNoteIndex];
 
-    if (closestNoteIndex < Number.POSITIVE_INFINITY) {
+    if (closestNoteIndex < Number.POSITIVE_INFINITY && !inputBlocked) {
         switch (note.type) {
             case 0:
                 ChangeGradeText(GetScore(Math.abs(leastTimeDifference)));
@@ -382,6 +404,12 @@ function Input(lane) {
                 }
                 break;
         }
+    } else {
+        inputs.push(inputStoredTime);
+        if (inputs.length >= inputsToTrigger) {
+            inputBlocked = true;
+            lastBlockTriggerTime = timeElapsed;
+        }
     }
     interactable[lane] = false;
 }
@@ -391,13 +419,7 @@ function ReleaseInput(lane) {
     let note = notes[closestNoteIndex];
 
     if (closestNoteIndex < Number.POSITIVE_INFINITY && note.type == 1 && note.endNote) {
-        /* console.log(`held note for ${timeHeld[note.lane]}ms of ${note.holdTime}ms`); */
-        if(note.holdTime - timeHeld[note.lane] <= missRange){
-            ChangeGradeText(GetScore(Math.abs(note.holdTime - timeHeld[note.lane])));
-        }else{
-            ChangeGradeText("Miss");
-        }
-
+        ChangeGradeText(GetScore(Math.abs(note.holdTime - timeHeld[note.lane])));
         DeleteNote(closestNoteIndex);
     }
 }
@@ -420,12 +442,15 @@ function GetClosestNoteIndex(lane) {
     return [closestNoteIndex, leastTimeDifference];
 }
 
-function ChangeGradeText(grade){
+function ChangeGradeText(grade) {
     lastGrade = grade;
     textSize = bigTextSize;
 }
 
 function GetScore(timeDifference) {
+    if (timeDifference >= missRange) {
+        return "Miss";
+    }
     return scoreTable.find((item) => timeDifference <= item.limit).label;
 }
 
@@ -457,6 +482,8 @@ function BindInput() {
     function KeyReleased(keyName) {
         interactable[keys[keyName]] = true;
         keysHeld[keys[keyName]] = false;
-        ReleaseInput(keys[keyName]);
+        if (!inputBlocked) {
+            ReleaseInput(keys[keyName]);
+        }
     }
 }

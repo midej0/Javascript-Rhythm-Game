@@ -13,11 +13,13 @@
 - [X] Add text for scoring
     - [X] Add effects such as size and alpha change
 
-- [ ] Add counter to spamming
-    - [ ] Check if the input missed completeley and block input
+- [X] Add counter to spamming
+    - [X] Check if the input missed completeley and block input
 
 - [ ] Fix chartlength variable for better handling in the scoring functions
+ 
+- [ ] Add scoring with points
 
 - [X] Add miss score for notes that go off screen
 
-- [ ] Fix bug where miss rating is set every frame while an unscored start hold note is off screen
+- [X] Fix bug where miss rating is set every frame while an unscored start hold note is off screen
