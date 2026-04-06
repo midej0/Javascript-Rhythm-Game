@@ -19,3 +19,5 @@
 - [ ] Fix chartlength variable for better handling in the scoring functions
 
 - [X] Add miss score for notes that go off screen
+
+- [ ] Fix bug where miss rating is set every frame while an unscored start hold note is off screen

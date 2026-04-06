@@ -211,7 +211,7 @@ function TickNotes() {
         e.yPosition += fallSpeed * deltaTime;
         if(!e.endNote && !e.scored && e.yPosition >= perfectYpos - smallestDist){
             shouldCount[e.lane] = true;
-            scored = true;
+            e.scored = true;
             ChangeGradeText("Miss");
         }
     });
@@ -219,8 +219,7 @@ function TickNotes() {
 
 function TickDeletion() {
     notes.forEach((e, i) => {
-        if (e.yPosition >= canvas.height + (noteSize / 2)) {
-            ChangeGradeText("Miss");
+        if (e.yPosition >= canvas.height + (noteSize / 2) && !e.endNote) {
             DeleteNote(i);
         }
     });
