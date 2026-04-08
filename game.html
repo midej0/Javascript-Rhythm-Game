@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,9 +8,22 @@
     <title>Playing Ts</title>
     <link rel="stylesheet" href="styles/game-style.css">
 </head>
+
 <body>
     <main id="main">
         <canvas id="gl-canvas" width="900" height="1600"></canvas>
+        <section class="Popup" id="FinishScreen">
+            <h2>Chart Finished!</h2>
+            <p id="ScoreText">Score: 2390</p>
+            <p id="MaxComboText">Max Combo: 123</p>
+            <ul id="AccuracyList">
+                <li>Perfect: 25%</li>
+                <li>Great: 25%</li>
+                <li>Okay: 25%</li>
+                <li>Miss: 25%</li>
+            </ul>
+        </section>
     </main>
 </body>
+
 </html>

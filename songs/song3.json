@@ -10,7 +10,7 @@
     },
     "chart": {
         "bpm": 120,
-        "offset": 0,
+        "offset": -100,
         "lanes": 4,
         "notes": [
             {

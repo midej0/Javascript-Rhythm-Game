@@ -18,8 +18,12 @@
 
 - [ ] Fix chartlength variable for better handling in the scoring functions
  
-- [ ] Add scoring with points
+- [X] Add scoring with points
 
 - [X] Add miss score for notes that go off screen
 
 - [X] Fix bug where miss rating is set every frame while an unscored start hold note is off screen
+
+- [X] Add a popup at the end of the chart
+    - [ ] Add a main menu button
+    - [ ] Add a retry button

@@ -15,9 +15,9 @@
         "notes": [
             {
                 "type": 1,
-                "time": 3000,
+                "time": 1000,
                 "lane": 1,
-                "endTime": 6000
+                "endTime": 3000
             }
         ]
     }

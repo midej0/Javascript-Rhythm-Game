@@ -47,6 +47,8 @@ let noteIndex = 0;
 let running = false;
 let audio;
 let offset;
+let finishTimeOffset = 2000;
+let finishTime;
 
 //Notes
 let spawnXPositions = [];
@@ -69,11 +71,16 @@ let noteColors = [
     new RGBA(255.0, 141.0, 104.0, 1.0),
     new RGBA(244.0, 234.0, 188.0, 1.0)
 ];
+let receptorColor = new RGBA(255.0, 255.0, 255.0, 1.0);
+let scoringTextColor = new RGBA(255.0, 255.0, 255.0, 1.0);
 let backgroundDim = 1;
 let receptorLineWidth = 15;
 let baseTextSize = 90;
 let bigTextSize = 120;
 let textSizeDecreaseSpeed = 70;
+let gradeTextOffset = 50;
+let comboSizeFactor = 1;
+let comboTextYPosition = 500;
 let textSize;
 
 //Scoring 
@@ -83,12 +90,15 @@ let greatRange = 75;
 let okayRange = 100;
 let missRange = 150;
 let scoreTable = [
-    { limit: perfectRange, label: "Perfect" },
-    { limit: greatRange, label: "Great" },
-    { limit: okayRange, label: "Okay" },
-    { limit: missRange, label: "Miss" }
+    { limit: perfectRange, label: "Perfect", amount: 0, score: 300 },
+    { limit: greatRange, label: "Great", amount: 0, score: 200 },
+    { limit: okayRange, label: "Okay", amount: 0, score: 100 },
+    { limit: missRange, label: "Miss", amount: 0, score: 0 }
 ]
 let lastGrade = "";
+let combo = 0;
+let maxCombo = 0;
+let score = 0;
 
 //Input
 let inputBlocked = false;
@@ -147,6 +157,7 @@ async function Setup(songPath) {
     await GetSong(songPath);
     chart = song.chart.notes;
     chartLength = chart.length;
+    finishTime = (chart[chartLength - 1].type == 0) ? chart[chartLength - 1].time + finishTimeOffset : chart[chartLength - 1].endTime + finishTimeOffset;
     offset = song.chart.offset;
     document.getElementById("main").style.backgroundImage = `linear-gradient(rgba(0, 0, 0, ${backgroundDim}), rgba(0, 0, 0, ${backgroundDim})), url(${song.songInfo.backgroundImage})`;
     SetSpawnXPositions();
@@ -180,7 +191,32 @@ function Tick() {
     TickDeletion();
     TickRatingText();
     DrawCanvas();
-    window.requestAnimationFrame(Tick);
+
+    if (timeElapsed >= finishTime) {
+        TriggerFinishPopup();
+    }
+
+    if (running) {
+        window.requestAnimationFrame(Tick);
+    }
+}
+
+function TriggerFinishPopup() {
+    //Used this instead of chartLength because chartlength only has one value for hold notes while two values are used when scoring hold notes
+    let totalNotes = scoreTable.reduce((sum, item) => sum + item.amount, 0);
+    let accuracyListChildren = document.getElementById("AccuracyList").children;
+
+    document.getElementById("ScoreText").textContent = `Score: ${score}/${totalNotes * 300}`;
+    document.getElementById("MaxComboText").textContent = (maxCombo == totalNotes) ? `Full Combo!` : `Max Combo: ${maxCombo}`;
+
+    for (let i = 0; i < accuracyListChildren.length; i++) {
+        accuracyListChildren[i].textContent = `${scoreTable[i].label}: ${(scoreTable[i].amount / totalNotes * 100).toFixed(2)}%`;
+    }
+
+    console.log((scoreTable[0].amount / totalNotes * 100).toFixed(2));
+
+    running = false;
+    document.getElementById("FinishScreen").classList.add("Active");
 }
 
 function UpdateTime() {
@@ -204,7 +240,7 @@ function TickInputTimers() {
             inputs.splice(i, 1);
         }
     }
-    if(timeElapsed >= lastBlockTriggerTime + unblockTime && inputBlocked){
+    if (timeElapsed >= lastBlockTriggerTime + unblockTime && inputBlocked) {
         inputBlocked = false;
         inputs.splice(0, inputs.length);
     }
@@ -233,7 +269,7 @@ function TickNotes() {
         if (!e.endNote && !e.scored && e.yPosition >= perfectYpos - smallestDist && e.type == 1) {
             shouldCount[e.lane] = true;
             e.scored = true;
-            ChangeGradeText("Miss");
+            ChangeGrade("Miss");
         }
     });
 }
@@ -241,7 +277,7 @@ function TickNotes() {
 function TickDeletion() {
     notes.forEach((e, i) => {
         if (e.yPosition >= canvas.height + (noteSize / 2) && !e.scored) {
-            ChangeGradeText("Miss");
+            ChangeGrade("Miss");
             DeleteNote(i);
         }
     });
@@ -322,16 +358,20 @@ function DrawReceptor() {
             DrawSquare(e, spawnYPosition, 110)
         }
         ctx.lineWidth = receptorLineWidth;
-        ctx.strokeStyle = "white";
+        ctx.strokeStyle = `rgba(${receptorColor.red}, ${receptorColor.green}, ${receptorColor.blue}, ${receptorColor.alpha})`;
         DrawCircle(e, perfectYpos, noteSize / 2, false)
     });
 }
 
 function DrawText() {
-    ctx.fillStyle = "white";
+    ctx.fillStyle = `rgba(${scoringTextColor.red}, ${scoringTextColor.green}, ${scoringTextColor.blue}, ${scoringTextColor.alpha})`;
     ctx.font = `${textSize}px sans-serif`;
     ctx.textAlign = "center";
-    ctx.fillText(lastGrade, canvas.width / 2, perfectYpos - noteSize);
+    ctx.fillText(lastGrade, canvas.width / 2, (perfectYpos - (noteSize / 2)) - gradeTextOffset);
+    if (combo > 0) {
+        ctx.font = `${textSize * comboSizeFactor}px sans-serif`;
+        ctx.fillText(combo, canvas.width / 2, comboTextYPosition);
+    }
 }
 
 function GetStartNote(id) {
@@ -393,13 +433,13 @@ function Input(lane) {
     if (closestNoteIndex < Number.POSITIVE_INFINITY && !inputBlocked) {
         switch (note.type) {
             case 0:
-                ChangeGradeText(GetScore(Math.abs(leastTimeDifference)));
+                ChangeGrade(GetScore(Math.abs(leastTimeDifference)));
                 DeleteNote(closestNoteIndex);
                 break;
             case 1:
                 if (!note.scored) {
                     shouldCount[note.lane] = true;
-                    ChangeGradeText(GetScore(Math.abs(leastTimeDifference)));
+                    ChangeGrade(GetScore(Math.abs(leastTimeDifference)));
                     note.scored = true;
                 }
                 break;
@@ -419,7 +459,7 @@ function ReleaseInput(lane) {
     let note = notes[closestNoteIndex];
 
     if (closestNoteIndex < Number.POSITIVE_INFINITY && note.type == 1 && note.endNote) {
-        ChangeGradeText(GetScore(Math.abs(note.holdTime - timeHeld[note.lane])));
+        ChangeGrade(GetScore(Math.abs(note.holdTime - timeHeld[note.lane])));
         DeleteNote(closestNoteIndex);
     }
 }
@@ -442,8 +482,13 @@ function GetClosestNoteIndex(lane) {
     return [closestNoteIndex, leastTimeDifference];
 }
 
-function ChangeGradeText(grade) {
+function ChangeGrade(grade) {
     lastGrade = grade;
+    combo += 1;
+    combo = (grade == "Okay" || grade == "Miss") ? 0 : combo;
+    maxCombo = (combo > maxCombo) ? combo : maxCombo;
+    scoreTable.find((item) => grade == item.label).amount++;
+    score += scoreTable.find((item) => grade == item.label).score;
     textSize = bigTextSize;
 }
 
