@@ -23,18 +23,6 @@ body {
     min-height: 100vh;
 }
 
-header {
-    background-color: gray;
-    text-align: center;
-    margin-bottom: 10px;
-}
-
-footer {
-    background-color: gray;
-    text-align: center;
-    margin-top: 10px;
-}
-
 main {
     flex: 1;
     filter: brightness(100%);
@@ -46,23 +34,118 @@ main {
     justify-content: center;
 }
 
+div>p, li, h2{
+    cursor: default;
+}
+
 #gl-canvas {
     height: 100vh;
     width: 56.25vh;
 }
 
 .Popup {
+    color: white;
+    padding: 10px;
+    border-radius: 25px;
     display: none;
-    background-color: red;
+    background-color: #383838;
     position: fixed;
+    text-align: center;
+    height: fit-content;
+    width: fit-content;
+
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr 0.5fr;
+    place-items: center;
+    grid-template-areas: 
+        "title title"
+        "score combo"
+        "accuracy accuracy"
+        "mainMenu retry";
+}
+
+#FinishScreenTitle{
+    grid-area: title;
+    font-size: 3rem;
+}
+
+.TextBox{
+    background-color: gray;
+    font-size: 1.5rem;
+    padding: 0.5em;
+    border-radius: 15px;
+    /*Using this to subtract the margin from the with since the margin selector doesn't work with height/width set to 100%*/
+    width: calc(100% - 16px);
+    height: calc(100% - 16px);
+
+    /*Centers the text*/
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     text-align: center;
 }
 
-#AccuracyList {
+.MenuButton{
+    color: white;
+    font-size: 1.5rem;
+    padding: 0.2rem;
+    border-radius: 15px;
+    border: 0.4rem solid white;
+    background-color: #d12e76;
+    transition: 300ms;
+
+    /*Using this to subtract the margin from the with since the margin selector doesn't work with height/width set to 100%*/
+    width: calc(100% - 16px);
+    height: calc(100% - 16px);
+
+    /*Centers the text*/
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+}
+
+.MenuButton:hover{
+    cursor: pointer;
+    scale: 1.1;
+}
+
+#ScoreTextBox{
+    grid-area: score;
+}
+
+#ComboTextBox{
+    grid-area: combo;
+}
+
+#AccuracyContainer {
+    grid-area: accuracy;
+}
+
+#MainMenuButton{
+    grid-area: mainMenu;
+}
+
+#RetryButton{
+    grid-area: retry;
+}
+
+#AccuracyList{
+    font-size: 1.25rem;
     list-style: none;
+    columns: 2;
     padding-left: 0px;
 }
 
 .Active {
-    display: block;
+    display: grid;
+    animation: show 500ms ease forwards;
+}
+
+/*Animations*/
+
+@keyframes show {
+    0%{transform: scale(0);}
+    50%{transform: scale(1.1);}
+    100%{transform: scale(1);}
 }

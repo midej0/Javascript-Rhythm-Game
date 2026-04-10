@@ -25,5 +25,9 @@
 - [X] Fix bug where miss rating is set every frame while an unscored start hold note is off screen
 
 - [X] Add a popup at the end of the chart
-    - [ ] Add a main menu button
-    - [ ] Add a retry button
+    - [X] Add a main menu button
+    - [X] Add a retry button
+
+- [X] Make popup look good (I tried my best)
+    - [X] Add animations
+    - [X] Change colors and layout

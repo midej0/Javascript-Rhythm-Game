@@ -13,15 +13,27 @@
     <main id="main">
         <canvas id="gl-canvas" width="900" height="1600"></canvas>
         <section class="Popup" id="FinishScreen">
-            <h2>Chart Finished!</h2>
-            <p id="ScoreText">Score: 2390</p>
-            <p id="MaxComboText">Max Combo: 123</p>
-            <ul id="AccuracyList">
-                <li>Perfect: 25%</li>
-                <li>Great: 25%</li>
-                <li>Okay: 25%</li>
-                <li>Miss: 25%</li>
-            </ul>
+            <h2 id="FinishScreenTitle">Chart Finished!</h2>
+            <div class="TextBox" id="ScoreTextBox">
+                <p id="ScoreText">Score: 177013</p>
+            </div>
+            <div class="TextBox" id="ComboTextBox">
+                <p id="MaxComboText">Max Combo: 39</p>
+            </div>
+            <div class="TextBox" id="AccuracyContainer">
+                <ul id="AccuracyList">
+                    <li>Perfect: 39.39%</li>
+                    <li>Great: 39.39%</li>
+                    <li>Okay: 39.39%</li>
+                    <li>Miss: 39.39%</li>
+                </ul>
+            </div>
+            <button class="MenuButton" id="MainMenuButton">
+                <p>Main Menu</p>
+            </button>
+            <button class="MenuButton" id="RetryButton">
+                <p>Retry</p>
+            </button>
         </section>
     </main>
 </body>

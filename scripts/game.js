@@ -78,7 +78,7 @@ let receptorLineWidth = 15;
 let baseTextSize = 90;
 let bigTextSize = 120;
 let textSizeDecreaseSpeed = 70;
-let gradeTextOffset = 50;
+let gradeTextOffset = 87.5;
 let comboSizeFactor = 1;
 let comboTextYPosition = 500;
 let textSize;
@@ -206,14 +206,12 @@ function TriggerFinishPopup() {
     let totalNotes = scoreTable.reduce((sum, item) => sum + item.amount, 0);
     let accuracyListChildren = document.getElementById("AccuracyList").children;
 
-    document.getElementById("ScoreText").textContent = `Score: ${score}/${totalNotes * 300}`;
+    document.getElementById("ScoreText").textContent = `Score: ${score}`;
     document.getElementById("MaxComboText").textContent = (maxCombo == totalNotes) ? `Full Combo!` : `Max Combo: ${maxCombo}`;
 
     for (let i = 0; i < accuracyListChildren.length; i++) {
-        accuracyListChildren[i].textContent = `${scoreTable[i].label}: ${(scoreTable[i].amount / totalNotes * 100).toFixed(2)}%`;
+        accuracyListChildren[i].textContent = `${scoreTable[i].label}: ${(scoreTable[i].amount / totalNotes == 1) ? scoreTable[i].amount / totalNotes * 100 : (scoreTable[i].amount / totalNotes * 100).toFixed(2)}%`;
     }
-
-    console.log((scoreTable[0].amount / totalNotes * 100).toFixed(2));
 
     running = false;
     document.getElementById("FinishScreen").classList.add("Active");
@@ -513,22 +511,30 @@ function BindInput() {
         }
     });
 
-    function SendInput(keyName) {
-        if (interactable[keys[keyName]]) {
-            Input(keys[keyName]);
-            keysHeld[keys[keyName]] = true;
-        }
-    }
-
     document.addEventListener("keyup", (event) => {
         KeyReleased(event.key);
     });
 
-    function KeyReleased(keyName) {
-        interactable[keys[keyName]] = true;
-        keysHeld[keys[keyName]] = false;
-        if (!inputBlocked) {
-            ReleaseInput(keys[keyName]);
-        }
+    document.getElementById("MainMenuButton").addEventListener("click", _ => {
+        window.location = "index.html"
+    });
+
+    document.getElementById("RetryButton").addEventListener("click", _ => {
+        window.location = "game.html"
+    });
+}
+
+function SendInput(keyName) {
+    if (interactable[keys[keyName]]) {
+        Input(keys[keyName]);
+        keysHeld[keys[keyName]] = true;
+    }
+}
+
+function KeyReleased(keyName) {
+    interactable[keys[keyName]] = true;
+    keysHeld[keys[keyName]] = false;
+    if (!inputBlocked) {
+        ReleaseInput(keys[keyName]);
     }
 }
