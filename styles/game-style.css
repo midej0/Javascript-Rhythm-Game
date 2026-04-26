@@ -74,7 +74,7 @@ div>p, li, h2{
     font-size: 1.5rem;
     padding: 0.5em;
     border-radius: 15px;
-    /*Using this to subtract the margin from the with since the margin selector doesn't work with height/width set to 100%*/
+    /*Using this to subtract the margin from the width since the margin selector doesn't work with height/width set to 100%*/
     width: calc(100% - 16px);
     height: calc(100% - 16px);
 

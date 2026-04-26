@@ -38,6 +38,6 @@
 
 - [ ] Add user settings
 
-- [ ] Add support for changing the resolution of the game (only needs to support 9:16)
+- [X] Add support for changing the resolution of the game (only needs to support 9:16)
 
-- [ ] Make song select buttons keyboard accessable
+- [X] Make song select buttons keyboard accessable
