@@ -31,3 +31,13 @@
 - [X] Make popup look good (I tried my best)
     - [X] Add animations
     - [X] Change colors and layout
+
+- [ ] Stop input lock from triggering while hold note is held
+
+- [ ] Fine tune the block input parameters
+
+- [ ] Add user settings
+
+- [ ] Add support for changing the resolution of the game (only needs to support 9:16)
+
+- [ ] Make song select buttons keyboard accessable

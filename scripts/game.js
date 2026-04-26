@@ -33,6 +33,19 @@ class RGBA {
     }
 }
 
+//The pixel sizes for the canvas based on graphicsQuality in the user config
+const qualities = Object.freeze({
+    "High": [900, 1600],
+    "Medium": [450, 800],
+    "Low": [225, 400]
+});
+
+/** @type {HTMLCanvasElement} */
+const canvas = document.getElementById("gl-canvas");
+
+/** @type {CanvasRenderingContext2D} */
+const ctx = canvas.getContext("2d");
+
 //Time Handling
 let deltaTime;
 let programStart;
@@ -47,41 +60,45 @@ let noteIndex = 0;
 let running = false;
 let audio;
 let offset;
-let finishTimeOffset = 2000;
+let finishTimeOffset = 1000;
 let finishTime;
 
-//Notes
-let spawnXPositions = [];
-let notes = [];
-let spawnYPosition = -50;
-let perfectYpos = 1400;
-let noteSize = 175;
-// filip speed 3000
-let fallSpeed = 1400;
-//Smallest dist is the maximum amount of pixels a note can be behind the perfectYpos before it is ignored.
-let smallestDist = -noteSize;
-let timeToPerfect = ((perfectYpos - spawnYPosition) / fallSpeed) * 1000;
-//The id of the hold notes, lets the begining and end portions of a hold note know where they are.
-let holdNoteId = 0;
-
 //Cosmetics
-let noteColors = [
+const noteColors = [
     new RGBA(26.0, 44.0, 121.0, 1.0),
     new RGBA(232.0, 5.0, 102.0, 1.0),
     new RGBA(255.0, 141.0, 104.0, 1.0),
     new RGBA(244.0, 234.0, 188.0, 1.0)
 ];
-let receptorColor = new RGBA(255.0, 255.0, 255.0, 1.0);
-let scoringTextColor = new RGBA(255.0, 255.0, 255.0, 1.0);
+//This is easier to implement but assumes the canvas is always 9:16
+const baseHeight = 1600;
+const heightMult = canvas.height / baseHeight;
+const receptorColor = new RGBA(255.0, 255.0, 255.0, 1);
+const scoringTextColor = new RGBA(255.0, 255.0, 255.0, 1.0);
+let highlightReceptor = true;
 let backgroundDim = 1;
-let receptorLineWidth = 15;
-let baseTextSize = 90;
-let bigTextSize = 120;
-let textSizeDecreaseSpeed = 70;
-let gradeTextOffset = 87.5;
+let receptorLineWidth = 15 * heightMult;
+let baseTextSize = 90 * heightMult;
+let bigTextSize = 120 * heightMult;
+let textSizeDecreaseSpeed = 70 * heightMult;
+let gradeTextOffset = 87.5 * heightMult;
 let comboSizeFactor = 1;
-let comboTextYPosition = 500;
+let comboTextYPosition = 500 * heightMult;
 let textSize;
+
+//Notes
+let spawnXPositions = [];
+let notes = [];
+let spawnYPosition = -50 * heightMult;
+let perfectYpos = 1400 * heightMult;
+let noteSize = 175 * heightMult;
+// filip speed 3000
+let fallSpeed = 2000 * heightMult;
+//Smallest dist is the maximum amount of pixels a note can be behind the perfectYpos before it is ignored.
+let smallestDist = -noteSize;
+let timeToPerfect = ((perfectYpos - spawnYPosition) / fallSpeed) * 1000;
+//The id of the hold notes, lets the beginning and end portions of a hold note know where they are.
+let holdNoteId = 0;
 
 //Scoring 
 //In milliseconds deviated from the time the note is supposed to be clicked
@@ -103,7 +120,7 @@ let score = 0;
 //Input
 let inputBlocked = false;
 let inputStoredTime = 750;
-let inputsToTrigger = 5;
+let inputsToTrigger = 10;
 //time with no missed inputs to reset the block timer
 let unblockTime = 250;
 let lastBlockTriggerTime;
@@ -139,12 +156,6 @@ globalThis.drawBadRange;
 globalThis.drawOkayrange;
 globalThis.drawGreatrange;
 globalThis.drawPerfectRange;
-
-/** @type {HTMLCanvasElement} */
-const canvas = document.getElementById("gl-canvas");
-
-/** @type {CanvasRenderingContext2D} */
-const ctx = canvas.getContext("2d");
 
 if (ctx == null) {
     alert("Your Device Doesn't Support The 2D WebGL Rendering Context");
@@ -350,13 +361,14 @@ function DrawNotes() {
 }
 
 function DrawReceptor() {
-    spawnXPositions.forEach(e => {
+    spawnXPositions.forEach((e, i) => {
         if (drawSpawnPoints == true) {
             ctx.fillStyle = "turquoise"
             DrawSquare(e, spawnYPosition, 110)
         }
+
         ctx.lineWidth = receptorLineWidth;
-        ctx.strokeStyle = `rgba(${receptorColor.red}, ${receptorColor.green}, ${receptorColor.blue}, ${receptorColor.alpha})`;
+        ctx.strokeStyle = `rgba(${receptorColor.red}, ${receptorColor.green}, ${receptorColor.blue}, ${(keysHeld[i] || !highlightReceptor) ? receptorColor.alpha : receptorColor.alpha * 0.5})`;
         DrawCircle(e, perfectYpos, noteSize / 2, false)
     });
 }

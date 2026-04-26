@@ -60,6 +60,10 @@ main {
     background-size: 100%;
     min-width: 600px;
     transition: 300ms;
+    cursor: pointer;
+    border: none;
+    text-align: left;
+    font: inherit;
 }
 
 .songCard:hover {

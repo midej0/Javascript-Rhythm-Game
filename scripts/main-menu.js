@@ -30,17 +30,18 @@ async function GetSongInfo(songPath) {
 }
 
 function CreateSongCard(imagePath, songName, artistName, audioPath, previewStart, previewEnd, backgroundImagePath, songPath) {
-    let songCard = document.createElement("div");
+    let songCard = document.createElement("button");
     songCard.classList.add("songCard");
     songCard.style.backgroundImage = 'linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.8)), url(' + backgroundImagePath + ')';
 
-    songCard.addEventListener("mouseover", (e) => {
+    songCard.addEventListener("mouseover", _ => {
         PlaySongPreview(audioPath, previewStart, previewEnd);
-    });
-    songCard.addEventListener("click", (e) => {
+    });   
+    songCard.addEventListener("click", _ => {
         localStorage.setItem("selectedSong", songPath);
         location = "game.html";
     });
+    songCard.tabIndex=0; 
 
     let image = document.createElement("img");
     image.setAttribute("src", imagePath);
