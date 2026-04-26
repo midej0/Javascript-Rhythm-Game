@@ -35,9 +35,9 @@ class RGBA {
 
 //The pixel sizes for the canvas based on graphicsQuality in the user config
 const qualities = Object.freeze({
-    "High": [900, 1600],
-    "Medium": [450, 800],
-    "Low": [225, 400]
+    "high": [900, 1600],
+    "medium": [450, 800],
+    "low": [225, 400]
 });
 
 /** @type {HTMLCanvasElement} */

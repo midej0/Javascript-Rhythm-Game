@@ -83,16 +83,20 @@ main {
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 1000;
+    opacity: 0%;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.ValueText{
+    display: inline;
 }
 
 .Active{
-    animation: show 500ms ease forwards;
+    opacity: 100%;
+    visibility: visible;
+    pointer-events: all;
 }
 
 /*Animations*/
-
-@keyframes show {
-    0%{transform: scale(0);} 
-    50%{transform: scale(1.1);}
-    100%{transform: scale(1);}
-}
