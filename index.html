@@ -13,7 +13,7 @@
 <body>
     <header id="header">
         <h1 id="mainTitle">Rhythm Game!!!</h1>
-        <button id="settingsButton">
+        <button id="settingsButton" class="MenuButton">
             <p>Settings</p>
         </button>
     </header>
@@ -21,33 +21,34 @@
         <div id="container">
 
         </div>
-        <section class="Popup" id="settingsPopup">
+        <dialog class="Popup" id="settingsMenu">
             <h2>Settings</h2>
             <ul>
-                <li>
+                <li class="InputField">
                     <label for="volume">Volume</label>
                     <input type="range" name="Volume" id="volume" min="0" max="1" step="0.01">
                     <p class="ValueText" id="volumeText">100%</p>
                 </li>
-                <li>
+                <li class="InputField">
                     <label for="backgroundDim">Background Dim</label>
                     <input type="range" name="BackgroundDim" id="backgroundDim" min="0" max="1" step="0.01">
                     <p class="ValueText" id="backgroundDimText">100%</p>
                 </li>
-                <li>
+                <li class="InputField">
                     <label for="scrollSpeed">Scroll Speed</label>
                     <input type="range" name="ScrollSpeed" id="scrollSpeed" min="1" max="20" step="0.1">
                     <p class="ValueText" id="scrollSpeedText">10.0</p>
+                    <p class="TimeText" id="timeText">500ms</p>
                 </li>
-                <li>
+                <li class="InputField">
                     <label for="highlightReceptor">Highlight Receptor</label>
                     <input type="checkbox" name="HighlightReceptor" id="highlightReceptor">
                 </li>
-                <li>
+                <li class="InputField">
                     <label for="drawEndNote">Draw End-Note</label>
                     <input type="checkbox" name="DrawEndNote" id="drawEndNote">
                 </li>
-                <li>
+                <li class="InputField">
                     <label for="graphicsQuality">Graphics Quality</label>
                     <select name="GraphicsQuality" id="graphicsQuality">
                         <option value="high">High</option>
@@ -56,7 +57,13 @@
                     </select>
                 </li>
             </ul>
-        </section>
+            <button id="resetButton" class="MenuButton">
+                <p>Reset To Default</p>
+            </button>
+            <button id="confirmButton" class="MenuButton">
+                <p>Confirm</p>
+            </button>
+        </dialog>
     </main>
     <footer id="footer">
         <p id="copyrightText">Copyright: hdfsljahfld</p>

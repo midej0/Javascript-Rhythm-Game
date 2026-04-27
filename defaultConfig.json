@@ -1,0 +1,8 @@
+{
+    "volume": 0.3,
+    "backgroundDim": 1,
+    "scrollSpeed": 13,
+    "highlightReceptor": true,
+    "drawEndNote": true,
+    "graphicsQuality": "high"
+}

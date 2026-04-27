@@ -1,20 +1,4 @@
-const baseConfig = { 
-    "volume": 0.5, 
-    "backgroundDim": 0.5, 
-    "scrollSpeed": 5, 
-    "highlightReceptor": true, 
-    "drawEndNote": true, 
-    "graphicsQuality": "high"
-};
-
-/* if(window.localStorage.getItem("config") == null){
-    window.localStorage.setItem("config", JSON.stringify(baseConfig));
-} */
-
-window.localStorage.setItem("config", JSON.stringify(baseConfig));
-
-const settingsButton = document.getElementById("settingsButton");
-const settingsPopup = document.getElementById("settingsPopup");
+const settingsMenu = document.getElementById("settingsMenu");
 const volumeSlider = document.getElementById("volume");
 const volumeText = document.getElementById("volumeText");
 const backgroundDimSlider = document.getElementById("backgroundDim");
@@ -24,65 +8,93 @@ const scrollSpeedText = document.getElementById("scrollSpeedText");
 const highlightReceptorField = document.getElementById("highlightReceptor");
 const drawEndNoteField = document.getElementById("drawEndNote");
 const graphicsQualityField = document.getElementById("graphicsQuality");
-let settingsOpen = false;
-let userConfig = JSON.parse(window.localStorage.getItem("config"));
+const timeText = document.getElementById("timeText");
+let defaultConfig;
+let userConfig;
 
-/*Binds all the inputs*/
-settingsButton.addEventListener("click", _ =>{
-    if(settingsOpen){
-        CloseSettings();
-    }else{
-        OpenSettings();
+Setup();
+
+async function Setup() {
+    await GetDefaultConfig();
+    if (typeof window.localStorage.getItem("config") == typeof defaultConfig) {
+        window.localStorage.setItem("config", JSON.stringify(defaultConfig));
     }
-});
-
-volumeSlider.addEventListener("input", (e) => {
-    userConfig.volume = e.target.value;
-    window.localStorage.setItem("config", JSON.stringify(userConfig));
+    userConfig = JSON.parse(window.localStorage.getItem("config"));
+    BindInput();
+    UpdateSettingsMenuInputFields();
     UpdateSettingsText();
-});
+}
 
-backgroundDimSlider.addEventListener("input", (e) => {
-    userConfig.backgroundDim = e.target.value;
-    window.localStorage.setItem("config", JSON.stringify(userConfig));
-    UpdateSettingsText();
-});
+async function GetDefaultConfig() {
+    try {
+        let response = await fetch("defaultConfig.json");
+        defaultConfig = await response.json();
+    } catch (error) {
+        console.log(error);
+    }
+}
 
-scrollSpeedSlider.addEventListener("input", (e) => {
-    userConfig.scrollSpeed = e.target.value;
-    window.localStorage.setItem("config", JSON.stringify(userConfig));
-    UpdateSettingsText();
-});
+function BindInput() {
+    document.getElementById("settingsButton").addEventListener("click", _ => {
+        OpenSettings();
+    });
 
-highlightReceptorField.addEventListener("input", (e) => {
-    userConfig.highlightReceptor = e.target.checked;
-    window.localStorage.setItem("config", JSON.stringify(userConfig));
-});
+    document.getElementById("confirmButton").addEventListener("click", _ => {
+        CloseSettings();
+    });
 
-drawEndNoteField.addEventListener("input", (e) => {
-    userConfig.drawEndNote = e.target.checked;
-    window.localStorage.setItem("config", JSON.stringify(userConfig));
-});
+    document.getElementById("resetButton").addEventListener("click", _ => {
+        window.localStorage.setItem("config", JSON.stringify(defaultConfig));
+        userConfig = JSON.parse(window.localStorage.getItem("config"));
+        UpdateSettingsMenuInputFields();
+        UpdateSettingsText();
+    });
 
-graphicsQualityField.addEventListener("input", (e) => {
-    userConfig.graphicsQuality = e.target.value;
-    window.localStorage.setItem("config", JSON.stringify(userConfig));
-});
+    volumeSlider.addEventListener("input", (e) => {
+        userConfig.volume = parseFloat(e.target.value);
+        window.localStorage.setItem("config", JSON.stringify(userConfig));
+        UpdateSettingsText();
+    });
 
-UpdateSettingsMenuInputFields();
-UpdateSettingsText();
+    backgroundDimSlider.addEventListener("input", (e) => {
+        userConfig.backgroundDim = parseFloat(e.target.value);
+        window.localStorage.setItem("config", JSON.stringify(userConfig));
+        UpdateSettingsText();
+    });
 
-function OpenSettings(){
-    settingsOpen = true;
-    settingsPopup.classList.add("Active");
+    scrollSpeedSlider.addEventListener("input", (e) => {
+        userConfig.scrollSpeed = parseFloat(e.target.value);
+        window.localStorage.setItem("config", JSON.stringify(userConfig));
+        UpdateSettingsText();
+    });
+
+    highlightReceptorField.addEventListener("input", (e) => {
+        userConfig.highlightReceptor = e.target.checked;
+        window.localStorage.setItem("config", JSON.stringify(userConfig));
+    });
+
+    drawEndNoteField.addEventListener("input", (e) => {
+        userConfig.drawEndNote = e.target.checked;
+        window.localStorage.setItem("config", JSON.stringify(userConfig));
+    });
+
+    graphicsQualityField.addEventListener("input", (e) => {
+        userConfig.graphicsQuality = e.target.value;
+        window.localStorage.setItem("config", JSON.stringify(userConfig));
+    });
+}
+
+function OpenSettings() {
+    settingsMenu.showModal();
+    settingsMenu.classList.add("Active");
 }
 
 function CloseSettings(){
-    settingsOpen = false;
-    settingsPopup.classList.remove("Active");
+    settingsMenu.close()
+    settingsMenu.classList.remove("Active");
 }
 
-function UpdateSettingsMenuInputFields(){
+function UpdateSettingsMenuInputFields() {
     volumeSlider.value = userConfig.volume;
     backgroundDimSlider.value = userConfig.backgroundDim;
     scrollSpeedSlider.value = userConfig.scrollSpeed;
@@ -91,8 +103,9 @@ function UpdateSettingsMenuInputFields(){
     graphicsQualityField.value = userConfig.graphicsQuality;
 }
 
-function UpdateSettingsText(){
+function UpdateSettingsText() {
     volumeText.textContent = `${Math.round(userConfig.volume * 100)}%`;
     backgroundDimText.textContent = `${Math.round(userConfig.backgroundDim * 100)}%`;
     scrollSpeedText.textContent = userConfig.scrollSpeed;
+    timeText.textContent = `${Math.round(2095 - (95 * userConfig.scrollSpeed))}ms`;
 }

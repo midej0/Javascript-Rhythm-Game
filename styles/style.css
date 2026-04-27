@@ -16,7 +16,7 @@ img {
 
 /*custom style*/
 body {
-    background-color: #3b3b3b;
+    background-color: #242424;
     display: flex;
     flex-direction: column;
     min-height: 100vh;
@@ -77,11 +77,15 @@ main {
 }
 
 .Popup{
-    background-color: red;
+    background-color: #383838;
+    color: white;
+    text-align: center;
+    padding: 10px;
+    border-radius: 25px;
+    min-width: 300px;
+    border: 0.4rem solid #212121;
+
     position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
     z-index: 1000;
     opacity: 0%;
     visibility: hidden;
@@ -89,8 +93,42 @@ main {
     transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
-.ValueText{
+.Popup>ul{
+    list-style: none;
+    text-align: left;
+    padding: 0;
+}
+
+.InputField{
+    margin-top: 10px;
+}
+
+.InputField>label{
+    display: block;
+}
+
+input{
+    accent-color: #d12e76;
+}
+
+.MenuButton{
+    color: white;
+    border-radius: 15px;
+    border: 0.4rem solid white;
+    background-color: #d12e76;
+}
+
+.ValueText, .TimeText{
     display: inline;
+}
+
+#timeText{
+    color: #5c5c5c;
+}
+
+.TimeText{
+    display: inline;
+    margin-left: 10px;
 }
 
 .Active{
@@ -98,5 +136,3 @@ main {
     visibility: visible;
     pointer-events: all;
 }
-
-/*Animations*/

@@ -1,7 +1,7 @@
-let songList;
-let container = document.getElementById("container");
 let audio = new Audio();
 let currentAudio;
+let songList;
+let container = document.getElementById("container");
 
 GetSongList();
 
@@ -45,6 +45,7 @@ function CreateSongCard(imagePath, songName, artistName, audioPath, previewStart
 
     let image = document.createElement("img");
     image.setAttribute("src", imagePath);
+    image.setAttribute("alt", "Song Cover Art")
 
     let names = document.createElement("div");
     names.classList.add("names");

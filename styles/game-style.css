@@ -38,9 +38,9 @@ div>p, li, h2{
     cursor: default;
 }
 
-#gl-canvas {
+#glCanvas {
     height: 100vh;
-    width: 56.25vh;
+    aspect-ratio: 9/16;
 }
 
 .Popup {
@@ -94,7 +94,7 @@ div>p, li, h2{
     background-color: #d12e76;
     transition: 300ms;
 
-    /*Using this to subtract the margin from the with since the margin selector doesn't work with height/width set to 100%*/
+    /*Using this to subtract the margin from the with since the margin property doesn't work with height/width set to 100%*/
     width: calc(100% - 16px);
     height: calc(100% - 16px);
 

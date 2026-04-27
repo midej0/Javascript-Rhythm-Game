@@ -36,7 +36,8 @@
 
 - [ ] Fine tune the block input parameters
 
-- [ ] Add user settings
+- [X] Add user settings
+    - [X] Improve menu
 
 - [X] Add support for changing the resolution of the game (only needs to support 9:16)
 

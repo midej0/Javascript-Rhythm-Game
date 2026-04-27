@@ -24,7 +24,7 @@ class HoldNote {
     }
 }
 
-class RGBA {
+class Color {
     constructor(red, green, blue, alpha) {
         this.red = red;
         this.blue = blue;
@@ -32,6 +32,8 @@ class RGBA {
         this.alpha = alpha;
     }
 }
+
+const userConfig = JSON.parse(window.localStorage.getItem("config"));
 
 //The pixel sizes for the canvas based on graphicsQuality in the user config
 const qualities = Object.freeze({
@@ -41,7 +43,11 @@ const qualities = Object.freeze({
 });
 
 /** @type {HTMLCanvasElement} */
-const canvas = document.getElementById("gl-canvas");
+const canvas = document.createElement("canvas");
+canvas.width = qualities[userConfig.graphicsQuality][0];
+canvas.height = qualities[userConfig.graphicsQuality][1];
+canvas.id = "glCanvas";
+document.getElementById("main").appendChild(canvas);
 
 /** @type {CanvasRenderingContext2D} */
 const ctx = canvas.getContext("2d");
@@ -65,48 +71,49 @@ let finishTime;
 
 //Cosmetics
 const noteColors = [
-    new RGBA(26.0, 44.0, 121.0, 1.0),
-    new RGBA(232.0, 5.0, 102.0, 1.0),
-    new RGBA(255.0, 141.0, 104.0, 1.0),
-    new RGBA(244.0, 234.0, 188.0, 1.0)
+    new Color(26.0, 44.0, 121.0, 1.0),
+    new Color(232.0, 5.0, 102.0, 1.0),
+    new Color(255.0, 141.0, 104.0, 1.0),
+    new Color(244.0, 234.0, 188.0, 1.0)
 ];
+const backdropColor = new Color(0.0, 0.0, 0.0, 0.5);
+const receptorColor = new Color(255.0, 255.0, 255.0, 1);
+const scoringTextColor = new Color(255.0, 255.0, 255.0, 1.0);
+const connectorColorMult = 0.6;
+const connectorAlphaMult = 0.9;
 //This is easier to implement but assumes the canvas is always 9:16
 const baseHeight = 1600;
 const heightMult = canvas.height / baseHeight;
-const receptorColor = new RGBA(255.0, 255.0, 255.0, 1);
-const scoringTextColor = new RGBA(255.0, 255.0, 255.0, 1.0);
-let highlightReceptor = true;
-let backgroundDim = 1;
-let receptorLineWidth = 15 * heightMult;
-let baseTextSize = 90 * heightMult;
-let bigTextSize = 120 * heightMult;
-let textSizeDecreaseSpeed = 70 * heightMult;
-let gradeTextOffset = 87.5 * heightMult;
-let comboSizeFactor = 1;
-let comboTextYPosition = 500 * heightMult;
+const receptorLineWidth = 15 * heightMult;
+const baseTextSize = 90 * heightMult;
+const bigTextSize = 120 * heightMult;
+const textSizeDecreaseSpeed = 70 * heightMult;
+const gradeTextOffset = 87.5 * heightMult;
+const comboSizeFactor = 1;
+const comboTextYPosition = 500 * heightMult;
 let textSize;
 
 //Notes
 let spawnXPositions = [];
 let notes = [];
-let spawnYPosition = -50 * heightMult;
-let perfectYpos = 1400 * heightMult;
-let noteSize = 175 * heightMult;
-// filip speed 3000
-let fallSpeed = 2000 * heightMult;
+const spawnYPosition = -50 * heightMult;
+const perfectYpos = 1400 * heightMult;
+const noteSize = 175 * heightMult;
+//Converts the scrollspeed to ms to perfect
+const timeToPerfect = 2095 - (95 * userConfig.scrollSpeed);
+const fallSpeed = ((perfectYpos - spawnYPosition) / timeToPerfect) * 1000;
 //Smallest dist is the maximum amount of pixels a note can be behind the perfectYpos before it is ignored.
-let smallestDist = -noteSize;
-let timeToPerfect = ((perfectYpos - spawnYPosition) / fallSpeed) * 1000;
+const smallestDist = -noteSize;
 //The id of the hold notes, lets the beginning and end portions of a hold note know where they are.
 let holdNoteId = 0;
 
 //Scoring 
 //In milliseconds deviated from the time the note is supposed to be clicked
-let perfectRange = 50;
-let greatRange = 75;
-let okayRange = 100;
-let missRange = 150;
-let scoreTable = [
+const perfectRange = 50;
+const greatRange = 75;
+const okayRange = 100;
+const missRange = 150;
+const scoreTable = [
     { limit: perfectRange, label: "Perfect", amount: 0, score: 300 },
     { limit: greatRange, label: "Great", amount: 0, score: 200 },
     { limit: okayRange, label: "Okay", amount: 0, score: 100 },
@@ -119,10 +126,10 @@ let score = 0;
 
 //Input
 let inputBlocked = false;
-let inputStoredTime = 750;
-let inputsToTrigger = 10;
+const inputStoredTime = 750;
+const inputsToTrigger = 10;
 //time with no missed inputs to reset the block timer
-let unblockTime = 250;
+const unblockTime = 250;
 let lastBlockTriggerTime;
 let inputs = [];
 //Used for click note detection, one for each lane
@@ -135,10 +142,10 @@ let shouldCount = [false, false, false, false];
 let timeHeld = [0, 0, 0, 0];
 //Key and lane pairs
 const keys = {
-    d: 0,
-    f: 1,
-    j: 2,
-    k: 3
+    "d": 0,
+    "f": 1,
+    "j": 2,
+    "k": 3
 }
 
 //Debug
@@ -170,8 +177,9 @@ async function Setup(songPath) {
     chartLength = chart.length;
     finishTime = (chart[chartLength - 1].type == 0) ? chart[chartLength - 1].time + finishTimeOffset : chart[chartLength - 1].endTime + finishTimeOffset;
     offset = song.chart.offset;
-    document.getElementById("main").style.backgroundImage = `linear-gradient(rgba(0, 0, 0, ${backgroundDim}), rgba(0, 0, 0, ${backgroundDim})), url(${song.songInfo.backgroundImage})`;
+    document.getElementById("main").style.backgroundImage = `linear-gradient(rgba(0, 0, 0, ${userConfig.backgroundDim}), rgba(0, 0, 0, ${userConfig.backgroundDim})), url(${song.songInfo.backgroundImage})`;
     SetSpawnXPositions();
+    DrawBackdrop();
     DrawReceptor();
     BindInput();
 }
@@ -179,7 +187,7 @@ async function Setup(songPath) {
 function Start() {
     programStart = Date.now();
     audio = new Audio(song.songInfo.audio);
-    audio.volume = 0.1;
+    audio.volume = userConfig.volume;
     audio.play();
     window.requestAnimationFrame(Tick);
 }
@@ -202,6 +210,8 @@ function Tick() {
     TickDeletion();
     TickRatingText();
     DrawCanvas();
+
+    console.log("jlsj");
 
     if (timeElapsed >= finishTime) {
         TriggerFinishPopup();
@@ -285,6 +295,10 @@ function TickNotes() {
 
 function TickDeletion() {
     notes.forEach((e, i) => {
+        if(e.yPosition >= perfectYpos){
+            console.log(timeElapsed);
+        }
+
         if (e.yPosition >= canvas.height + (noteSize / 2) && !e.scored) {
             ChangeGrade("Miss");
             DeleteNote(i);
@@ -302,7 +316,7 @@ function TickRatingText() {
 function DrawCanvas() {
     //Clears the canvas
     canvas.width = canvas.width;
-
+    DrawBackdrop();
     DrawHoldConnector();
     DrawNotes();
     DrawReceptor();
@@ -329,13 +343,18 @@ function DrawCanvas() {
     }
 }
 
+function DrawBackdrop() {
+    ctx.fillStyle = `rgba(${backdropColor.red}, ${backdropColor.green}, ${backdropColor.blue}, ${backdropColor.alpha})`;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
+
 function DrawHoldConnector() {
     notes.forEach(e => {
         if (e.endNote) {
             let startYPosition = GetStartNote(e.id).yPosition;
             let color = noteColors[e.lane];
 
-            ctx.fillStyle = `rgba(${color.red * 0.6}, ${color.green * 0.6}, ${color.blue * 0.6}, ${color.alpha * 0.9})`;
+            ctx.fillStyle = `rgba(${color.red * connectorColorMult}, ${color.green * connectorColorMult}, ${color.blue * connectorColorMult}, ${color.alpha * connectorAlphaMult})`;
 
             if (GetStartNote(e.id).scored && keysHeld[e.lane] && e.yPosition < perfectYpos - smallestDist / 2 && !inputBlocked) {
                 ctx.fillRect(e.xPosition - (noteSize / 2), e.yPosition, noteSize, perfectYpos - e.yPosition);
@@ -352,11 +371,19 @@ function DrawHoldConnector() {
 
 function DrawNotes() {
     notes.forEach(e => {
-        let noteColor = noteColors[e.lane];
-        ctx.fillStyle = `rgba(${noteColor.red}, ${noteColor.green}, ${noteColor.blue}, ${noteColor.alpha})`;
-        if (!e.scored) {
-            DrawCircle(e.xPosition, e.yPosition, noteSize / 2, true);
+        if (e.scored) {
+            return;
         }
+        let noteColor = noteColors[e.lane];
+        if (e.endNote && !userConfig.drawEndNote) {
+            ctx.fillStyle = `rgba(${noteColor.red * connectorColorMult}, ${noteColor.green * connectorColorMult}, ${noteColor.blue * connectorColorMult}, ${noteColor.alpha * connectorAlphaMult})`;
+            ctx.beginPath();
+            ctx.arc(e.xPosition, e.yPosition, noteSize / 2, Math.PI, 0);
+            ctx.fill();
+            return;
+        }
+        ctx.fillStyle = `rgba(${noteColor.red}, ${noteColor.green}, ${noteColor.blue}, ${noteColor.alpha})`;
+        DrawCircle(e.xPosition, e.yPosition, noteSize / 2, true);
     });
 }
 
@@ -368,7 +395,7 @@ function DrawReceptor() {
         }
 
         ctx.lineWidth = receptorLineWidth;
-        ctx.strokeStyle = `rgba(${receptorColor.red}, ${receptorColor.green}, ${receptorColor.blue}, ${(keysHeld[i] || !highlightReceptor) ? receptorColor.alpha : receptorColor.alpha * 0.5})`;
+        ctx.strokeStyle = `rgba(${receptorColor.red}, ${receptorColor.green}, ${receptorColor.blue}, ${(keysHeld[i] || !userConfig.highlightReceptor) ? receptorColor.alpha : receptorColor.alpha * 0.5})`;
         DrawCircle(e, perfectYpos, noteSize / 2, false)
     });
 }
