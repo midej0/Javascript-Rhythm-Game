@@ -149,7 +149,6 @@ const keys = {
 }
 
 //Debug
-let drawSpawnPoints = false;
 let drawScoringRanges = false;
 let drawBadRange = true;
 let drawOkayrange = true;
@@ -157,7 +156,6 @@ let drawGreatrange = true;
 let drawPerfectRange = true;
 
 //Makes it possible to debug during runtime
-globalThis.drawSpawnPoints;
 globalThis.drawScoringRanges;
 globalThis.drawBadRange;
 globalThis.drawOkayrange;
@@ -386,11 +384,6 @@ function DrawNotes() {
 
 function DrawReceptor() {
     spawnXPositions.forEach((e, i) => {
-        if (drawSpawnPoints == true) {
-            ctx.fillStyle = "turquoise"
-            DrawSquare(e, spawnYPosition, 110)
-        }
-
         ctx.lineWidth = receptorLineWidth;
         ctx.strokeStyle = `rgba(${receptorColor.red}, ${receptorColor.green}, ${receptorColor.blue}, ${(keysHeld[i] || !userConfig.highlightReceptor) ? receptorColor.alpha : receptorColor.alpha * 0.5})`;
         DrawCircle(e, perfectYpos, noteSize / 2, false)
