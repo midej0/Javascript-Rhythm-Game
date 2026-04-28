@@ -40,6 +40,7 @@ function BindInput() {
     });
 
     document.getElementById("confirmButton").addEventListener("click", _ => {
+        window.localStorage.setItem("config", JSON.stringify(userConfig));
         CloseSettings();
     });
 
@@ -52,35 +53,29 @@ function BindInput() {
 
     volumeSlider.addEventListener("input", (e) => {
         userConfig.volume = parseFloat(e.target.value);
-        window.localStorage.setItem("config", JSON.stringify(userConfig));
         UpdateSettingsText();
     });
 
     backgroundDimSlider.addEventListener("input", (e) => {
         userConfig.backgroundDim = parseFloat(e.target.value);
-        window.localStorage.setItem("config", JSON.stringify(userConfig));
         UpdateSettingsText();
     });
 
     scrollSpeedSlider.addEventListener("input", (e) => {
         userConfig.scrollSpeed = parseFloat(e.target.value);
-        window.localStorage.setItem("config", JSON.stringify(userConfig));
         UpdateSettingsText();
     });
 
     highlightReceptorField.addEventListener("input", (e) => {
         userConfig.highlightReceptor = e.target.checked;
-        window.localStorage.setItem("config", JSON.stringify(userConfig));
     });
 
     drawEndNoteField.addEventListener("input", (e) => {
         userConfig.drawEndNote = e.target.checked;
-        window.localStorage.setItem("config", JSON.stringify(userConfig));
     });
 
     graphicsQualityField.addEventListener("input", (e) => {
         userConfig.graphicsQuality = e.target.value;
-        window.localStorage.setItem("config", JSON.stringify(userConfig));
     });
 }
 

@@ -132,7 +132,7 @@ const inputsToTrigger = 10;
 const unblockTime = 250;
 let lastBlockTriggerTime;
 let inputs = [];
-//Used for click note detection, one for each lane
+//Used for click note detection since the keyboard event fires every frame, one for each lane
 let interactable = [true, true, true, true];
 //For hold note detection, one for each lane.
 let keysHeld = [false, false, false, false];
@@ -211,8 +211,6 @@ function Tick() {
     TickRatingText();
     DrawCanvas();
 
-    console.log("jlsj");
-
     if (timeElapsed >= finishTime) {
         TriggerFinishPopup();
     }
@@ -253,12 +251,13 @@ function UpdateTimeHeld() {
 }
 
 function TickInputTimers() {
-    for (let i = 0; i < inputs.length; i++) {
-        inputs[i] -= deltaTime * 1000;
-        if (inputs[i] <= 0) {
+    inputs.forEach((e, i) =>{
+        e -= deltaTime * 1000;
+        if (e <= 0) {
             inputs.splice(i, 1);
         }
-    }
+    });
+
     if (timeElapsed >= lastBlockTriggerTime + unblockTime && inputBlocked) {
         inputBlocked = false;
         inputs.splice(0, inputs.length);
@@ -295,10 +294,6 @@ function TickNotes() {
 
 function TickDeletion() {
     notes.forEach((e, i) => {
-        if(e.yPosition >= perfectYpos){
-            console.log(timeElapsed);
-        }
-
         if (e.yPosition >= canvas.height + (noteSize / 2) && !e.scored) {
             ChangeGrade("Miss");
             DeleteNote(i);
@@ -310,6 +305,7 @@ function TickRatingText() {
     if (textSize > baseTextSize) {
         textSize -= textSizeDecreaseSpeed * deltaTime;
     }
+    //stop it from getting smaller than the base text size
     textSize = (textSize < baseTextSize) ? baseTextSize : textSize;
 }
 
@@ -322,6 +318,7 @@ function DrawCanvas() {
     DrawReceptor();
     DrawText();
 
+    //The chart needs to be running for the boxes to show, can't render until Tick() is running
     if (drawBadRange && drawScoringRanges) {
         ctx.fillStyle = "rgba(255.0, 255.0, 255.0, 0.5)";
         ctx.fillRect(0, perfectYpos - (missRange / 1000) * fallSpeed, canvas.width, (missRange / 1000) * fallSpeed * 2);
@@ -537,8 +534,8 @@ function GetScore(timeDifference) {
 }
 
 function BindInput() {
-    document.addEventListener("keydown", (event) => {
-        const keyName = event.key;
+    document.addEventListener("keydown", (e) => {
+        const keyName = e.key;
 
         SendInput(keyName);
 
@@ -550,8 +547,8 @@ function BindInput() {
         }
     });
 
-    document.addEventListener("keyup", (event) => {
-        KeyReleased(event.key);
+    document.addEventListener("keyup", (e) => {
+        KeyReleased(e.key);
     });
 
     document.getElementById("MainMenuButton").addEventListener("click", _ => {
