@@ -127,7 +127,7 @@ let score = 0;
 //Input
 let inputBlocked = false;
 const inputStoredTime = 750;
-const inputsToTrigger = 10;
+const inputsToTrigger = 30;
 //time with no missed inputs to reset the block timer
 const unblockTime = 250;
 let lastBlockTriggerTime;
@@ -176,10 +176,19 @@ async function Setup(songPath) {
     finishTime = (chart[chartLength - 1].type == 0) ? chart[chartLength - 1].time + finishTimeOffset : chart[chartLength - 1].endTime + finishTimeOffset;
     offset = song.chart.offset;
     document.getElementById("main").style.backgroundImage = `linear-gradient(rgba(0, 0, 0, ${userConfig.backgroundDim}), rgba(0, 0, 0, ${userConfig.backgroundDim})), url(${song.songInfo.backgroundImage})`;
+
     SetSpawnXPositions();
     DrawBackdrop();
     DrawReceptor();
+    DrawWelcomeMessage();
     BindInput();
+}
+
+function DrawWelcomeMessage() {
+    ctx.fillStyle = `rgba(${scoringTextColor.red}, ${scoringTextColor.green}, ${scoringTextColor.blue}, ${scoringTextColor.alpha})`;
+    ctx.textAlign = "center";
+    ctx.font = `${80 * heightMult}px sans-serif`;
+    ctx.fillText("Press 'SPACE' To Start", canvas.width / 2, canvas.height / 2);
 }
 
 function Start() {
@@ -249,7 +258,7 @@ function UpdateTimeHeld() {
 }
 
 function TickInputTimers() {
-    inputs.forEach((e, i) =>{
+    inputs.forEach((e, i) => {
         e -= deltaTime * 1000;
         if (e <= 0) {
             inputs.splice(i, 1);
@@ -532,7 +541,7 @@ function BindInput() {
 
         SendInput(keyName);
 
-        if (keyName === "q") {
+        if (keyName === " ") {
             if (!running) {
                 Start();
                 running = true;
