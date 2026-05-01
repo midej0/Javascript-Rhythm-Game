@@ -176,12 +176,18 @@ async function Setup(songPath) {
     finishTime = (chart[chartLength - 1].type == 0) ? chart[chartLength - 1].time + finishTimeOffset : chart[chartLength - 1].endTime + finishTimeOffset;
     offset = song.chart.offset;
     document.getElementById("main").style.backgroundImage = `linear-gradient(rgba(0, 0, 0, ${userConfig.backgroundDim}), rgba(0, 0, 0, ${userConfig.backgroundDim})), url(${song.songInfo.backgroundImage})`;
-
+    SpawnEmbed();
     SetSpawnXPositions();
     DrawBackdrop();
     DrawReceptor();
     DrawWelcomeMessage();
     BindInput();
+}
+
+function SpawnEmbed(){
+    let embed = document.createElement("iframe");
+    embed.setAttribute("src", song.songInfo.ytAudio);
+    document.getElementById("main").appendChild(embed);
 }
 
 function DrawWelcomeMessage() {
