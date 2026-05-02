@@ -52,6 +52,9 @@ document.getElementById("main").appendChild(canvas);
 /** @type {CanvasRenderingContext2D} */
 const ctx = canvas.getContext("2d");
 
+//For the embed player
+let player;
+
 //Time Handling
 let deltaTime;
 let programStart;
@@ -64,7 +67,6 @@ let chart;
 let chartLength;
 let noteIndex = 0;
 let running = false;
-let audio;
 let offset;
 let finishTimeOffset = 1000;
 let finishTime;
@@ -127,7 +129,7 @@ let score = 0;
 //Input
 let inputBlocked = false;
 const inputStoredTime = 750;
-const inputsToTrigger = 30;
+const inputsToTrigger = 50;
 //time with no missed inputs to reset the block timer
 const unblockTime = 250;
 let lastBlockTriggerTime;
@@ -177,31 +179,34 @@ async function Setup(songPath) {
     offset = song.chart.offset;
     document.getElementById("main").style.backgroundImage = `linear-gradient(rgba(0, 0, 0, ${userConfig.backgroundDim}), rgba(0, 0, 0, ${userConfig.backgroundDim})), url(${song.songInfo.backgroundImage})`;
     SpawnEmbed();
+    document.getElementById("startListenButton").addEventListener("click", _ =>{
+        player = new YT.Player("embed", { events: { onStateChange: TriggerStart } });
+    });
     SetSpawnXPositions();
     DrawBackdrop();
     DrawReceptor();
-    DrawWelcomeMessage();
     BindInput();
 }
 
-function SpawnEmbed(){
+function SpawnEmbed() {
     let embed = document.createElement("iframe");
     embed.setAttribute("src", song.songInfo.ytAudio);
-    document.getElementById("main").appendChild(embed);
+    embed.setAttribute("id", "embed");
+    document.getElementById("sideContainer").appendChild(embed);
 }
 
-function DrawWelcomeMessage() {
-    ctx.fillStyle = `rgba(${scoringTextColor.red}, ${scoringTextColor.green}, ${scoringTextColor.blue}, ${scoringTextColor.alpha})`;
-    ctx.textAlign = "center";
-    ctx.font = `${80 * heightMult}px sans-serif`;
-    ctx.fillText("Press 'SPACE' To Start", canvas.width / 2, canvas.height / 2);
+function TriggerStart(event) {
+    if (event.data === YT.PlayerState.PLAYING) {
+        Start();
+    }
 }
 
 function Start() {
+    if (running) {
+        return;
+    }
+    running = true;
     programStart = Date.now();
-    audio = new Audio(song.songInfo.audio);
-    audio.volume = userConfig.volume;
-    audio.play();
     window.requestAnimationFrame(Tick);
 }
 
@@ -527,7 +532,7 @@ function GetClosestNoteIndex(lane) {
 function ChangeGrade(grade) {
     lastGrade = grade;
     combo += 1;
-    combo = (grade == "Okay" || grade == "Miss") ? 0 : combo;
+    combo = (grade == "Miss") ? 0 : combo;
     maxCombo = (combo > maxCombo) ? combo : maxCombo;
     scoreTable.find((item) => grade == item.label).amount++;
     score += scoreTable.find((item) => grade == item.label).score;
@@ -543,16 +548,7 @@ function GetScore(timeDifference) {
 
 function BindInput() {
     document.addEventListener("keydown", (e) => {
-        const keyName = e.key;
-
-        SendInput(keyName);
-
-        if (keyName === " ") {
-            if (!running) {
-                Start();
-                running = true;
-            }
-        }
+        SendInput(e.key);
     });
 
     document.addEventListener("keyup", (e) => {

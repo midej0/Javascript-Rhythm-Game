@@ -2,8 +2,7 @@
     "songInfo": {
         "name": "So High",
         "artist": "Ridiculon",
-        "audio": "music/so-high.mp3",
-        "ytAudio": "https://www.youtube.com/embed/DGJpUitB_mM",
+        "ytAudio": "https://www.youtube.com/embed/DGJpUitB_mM?enablejsapi=1",
         "image": "img/covers/so-high-cov.jpg",
         "backgroundImage": "img/backgrounds/so-high-bg.jpg",
         "previewStart": 84000,

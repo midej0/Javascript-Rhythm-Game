@@ -1,6 +1,4 @@
 const settingsMenu = document.getElementById("settingsMenu");
-const volumeSlider = document.getElementById("volume");
-const volumeText = document.getElementById("volumeText");
 const backgroundDimSlider = document.getElementById("backgroundDim");
 const backgroundDimText = document.getElementById("backgroundDimText");
 const scrollSpeedSlider = document.getElementById("scrollSpeed");
@@ -51,11 +49,6 @@ function BindInput() {
         UpdateSettingsText();
     });
 
-    volumeSlider.addEventListener("input", (e) => {
-        userConfig.volume = parseFloat(e.target.value);
-        UpdateSettingsText();
-    });
-
     backgroundDimSlider.addEventListener("input", (e) => {
         userConfig.backgroundDim = parseFloat(e.target.value);
         UpdateSettingsText();
@@ -90,7 +83,6 @@ function CloseSettings(){
 }
 
 function UpdateSettingsMenuInputFields() {
-    volumeSlider.value = userConfig.volume;
     backgroundDimSlider.value = userConfig.backgroundDim;
     scrollSpeedSlider.value = userConfig.scrollSpeed;
     highlightReceptorField.checked = userConfig.highlightReceptor;
@@ -99,7 +91,6 @@ function UpdateSettingsMenuInputFields() {
 }
 
 function UpdateSettingsText() {
-    volumeText.textContent = `${Math.round(userConfig.volume * 100)}%`;
     backgroundDimText.textContent = `${Math.round(userConfig.backgroundDim * 100)}%`;
     scrollSpeedText.textContent = userConfig.scrollSpeed;
     timeText.textContent = `${Math.round(2095 - (95 * userConfig.scrollSpeed))}ms`;

@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://www.youtube.com/iframe_api"></script>
     <script src="scripts/game.js" defer="true"></script>
     <title>Playing ts</title>
     <link rel="stylesheet" href="styles/game-style.css">
@@ -11,6 +12,11 @@
 
 <body>
     <main id="main">
+        <div id="sideContainer">
+            <button id="startListenButton" class="MenuButton">
+                <p>Start Listening</p>
+            </button>
+        </div>
         <section class="Popup" id="FinishScreen">
             <h2 id="FinishScreenTitle">Chart Finished!</h2>
             <div class="TextBox" id="ScoreTextBox">

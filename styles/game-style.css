@@ -38,6 +38,11 @@ div>p, li, h2{
     cursor: default;
 }
 
+#sideContainer{
+    display: flex;
+    flex-direction: column-reverse;
+}
+
 #glCanvas {
     height: 100vh;
     aspect-ratio: 9/16;
