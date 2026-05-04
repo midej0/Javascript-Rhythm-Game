@@ -180,6 +180,7 @@ async function Setup(songPath) {
     document.getElementById("main").style.backgroundImage = `linear-gradient(rgba(0, 0, 0, ${userConfig.backgroundDim}), rgba(0, 0, 0, ${userConfig.backgroundDim})), url(${song.songInfo.backgroundImage})`;
     SpawnEmbed();
     document.getElementById("startListenButton").addEventListener("click", _ =>{
+        //Had to use the yt api since the event listener isn't fired when an iframe is clicked
         player = new YT.Player("embed", { events: { onStateChange: TriggerStart } });
     });
     SetSpawnXPositions();

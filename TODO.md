@@ -42,3 +42,5 @@
 - [X] Add support for changing the resolution of the game (only needs to support 9:16)
 
 - [X] Make song select buttons keyboard accessable
+
+- [ ] Improve color class so I don't have to use the way I set fillstyle
