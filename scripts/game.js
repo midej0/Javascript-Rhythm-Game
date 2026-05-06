@@ -488,6 +488,7 @@ function Input(lane) {
                 if (!note.scored) {
                     shouldCount[note.lane] = true;
                     ChangeGrade(GetScore(Math.abs(leastTimeDifference)));
+                    timeHeld[note.lane] = 0;
                     note.scored = true;
                 }
                 break;
