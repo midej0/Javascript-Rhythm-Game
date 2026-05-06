@@ -14,9 +14,10 @@
         "lanes": 4,
         "notes": [
             {
-                "type": 0,
+                "type": 1,
                 "time": 3000,
-                "lane": 1
+                "lane": 1,
+                "endTime": 4000
             }
         ]
     }
